@@ -1,0 +1,18 @@
+div.resolution-error
+{
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-weight: 600;
+    color: #0091EA;
+    padding: 0 16px;
+
+    img
+    {
+        width: 100%;
+        max-width: 200px;
+        margin-top: 40px;
+    }
+}
