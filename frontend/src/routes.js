@@ -3,6 +3,7 @@ import App from "./App";
 import {BrowserRouter, Switch, Route} from "react-router-dom";
 import MediaQuery from 'react-responsive';
 import ResolutionError from "./pages/ResolutionError";
+import Register from "./pages/Register";
 
 const Routes = () =>
 {
@@ -13,6 +14,7 @@ const Routes = () =>
                 <BrowserRouter>
                     <Switch>
                         <Route path="/" exact component={App}/>
+                        <Route path="/" component={Register}/>
                     </Switch>
                 </BrowserRouter>
             </MediaQuery>

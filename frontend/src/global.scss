@@ -1,10 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@200;300;400;500;600;700&display=swap');
 
 @import "./variables";
+@import "./sass/animations";
 
 *{
     margin: 0;
     padding: 0;
+    -moz-box-sizing: border-box;
     box-sizing: border-box;
     outline: none;
     font-family: 'Exo 2', sans-serif;
@@ -12,7 +14,7 @@
 
 body
 {
-    background: #F0F0F5;
+    background: $backgroundColor;
 }
 
 input, button, textarea, select
@@ -26,11 +28,37 @@ button, input[type=submit], select
     cursor: pointer;
 }
 
+a.link-to
+{
+    display: inline-flex;
+    align-items: center;
+    margin-top: 40px;
+    color:#41414d;
+    font-weight: 600;
+    text-decoration: underline transparent;
+    font-size: 18px;
+    transition: all ease-in-out 500ms;
+
+    svg
+    {
+        color: $colorPrimary;
+        margin-right: 8px;
+        font-size: 16px;
+    }
+
+    &:hover
+    {
+        opacity: 0.8;
+        text-decoration: underline;
+    }
+}
+
 form
 {
     input, select
     {
         width: 100%;
+        min-width: 120px;
         height: 60px;
         color: #333;
         border:1px #dcdce6 solid !important;
