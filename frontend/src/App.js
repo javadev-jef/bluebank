@@ -1,10 +1,9 @@
 import React from 'react';
+import Logon from './pages/Logon';
 
 function App() {
   return (
-    <div className="App">
-      <h1>Blue Bank</h1>
-    </div>
+    <Logon />
   );
 }
 

@@ -1,14 +1,105 @@
-@import url('https://fonts.googleapis.com/css2?family=Exo:wght@200;300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@200;300;400;500;600;700&display=swap');
+
+@import "./variables";
 
 *{
     margin: 0;
     padding: 0;
     box-sizing: border-box;
     outline: none;
-    font-family: 'Exo', sans-serif;
+    font-family: 'Exo 2', sans-serif;
 }
 
 body
 {
     background: #F0F0F5;
+}
+
+input, button, textarea, select
+{
+    font-family: 'Exo 2', sans-serif;
+    font-size: 18px;
+}
+
+button, input[type=submit], select
+{
+    cursor: pointer;
+}
+
+form
+{
+    input, select
+    {
+        width: 100%;
+        height: 60px;
+        color: #333;
+        border:1px #dcdce6 solid !important;
+        border-radius: 8px;
+        padding: 0 12px;
+
+        &:not(:first-child), &:not(.input-group)
+        {
+            margin-top: 8px;
+        }
+    }
+
+    div.input-group
+    {
+        display: flex;
+
+        input:not(:first-child)
+        {
+            margin-left: 8px;
+        }
+    }
+
+    .button
+    {
+        width: 100%;
+        height: 60px;
+        background: $colorPrimary;
+        border: 0;
+        font-weight: bold;
+        margin-top: 16px;
+        color: #FFF;
+        transition: filter 500ms;
+
+        &:hover
+        {
+            filter: brightness(90%);
+        }
+    }
+}
+
+h1
+{
+    font-size: 30px;
+
+    span.part-01
+    {
+        font-weight: 400;
+        &::after{content: " ";}
+    }
+
+    span.part-02
+    {
+        font-weight: 600;
+    }
+
+    &.logo
+    {
+        font-size: 48px;
+        text-transform: uppercase;
+        
+        span.part-01
+        {
+            color: #0091EA;
+            font-weight: 700;
+        }
+
+        span.part-02
+        {
+            font-weight: 400;
+        }
+    }
 }
