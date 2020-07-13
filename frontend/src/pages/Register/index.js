@@ -4,6 +4,9 @@ import "./style.scss";
 import { Link } from "react-router-dom";
 import { FiArrowLeft } from "react-icons/fi";
 import { useState } from "react";
+import { useEffect } from "react";
+import { useEstados } from "../../hooks/useEstados";
+import { useCidades } from "../../hooks/useCidades";
 
 export default function Register()
 {
@@ -16,12 +19,34 @@ export default function Register()
     const [senha, setSenha] = useState("");
     const [repetirSenha, setRepetirSenha] = useState("");
 
+    const estadosIbge = useEstados();
+    const cidadesIbge = useCidades();
+
     const handleSubmit = (event) =>
     {
         event.preventDefault();
         const data = {nome, cpf, nascimento, email, estado, cidade, senha, repetirSenha};
         console.log(data);
     }
+
+    useEffect(() => 
+    {
+        estadosIbge.list();
+        
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
+    useEffect(() => 
+    { 
+        // Removes the current cidade when change the estado
+        setCidade("");
+
+        // Reports the loading of cidades as a option
+        cidadesIbge.setCidades([{id: 0, nome: "Carregando..."}]);
+        cidadesIbge.list(estado);
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [estado]);
 
     return(
         <div className="register-container">
@@ -67,13 +92,16 @@ export default function Register()
                             onChange={e => setEstado(e.target.value)}
                         >
                             <option value="" defaultValue hidden>Estado</option>
-                            <option value="MG">MG</option>
+                            {estadosIbge.estados.map(estado => (<option key={estado.id} value={estado.id}>{estado.sigla}</option>))}
                         </select>
-                        <input 
-                            placeholder="Cidade"
+                        <select 
                             value={cidade}
                             onChange={e => setCidade(e.target.value)}
-                        />
+                            disabled={cidadesIbge.cidades.length === 0}
+                        >
+                            <option value="" defaultValue hidden>Cidade</option>
+                            {cidadesIbge.cidades.map(cidade => (<option key={cidade.id} value={cidade.id}>{cidade.nome}</option>))}
+                        </select>
                     </div>
                     <div className="input-group">
                         <input 
@@ -86,7 +114,8 @@ export default function Register()
                             type="password"
                             placeholder="Repetir senha"
                             value={repetirSenha}
-                            onChange={e => setRepetirSenha(e.target.value)}/>
+                            onChange={e => setRepetirSenha(e.target.value)}
+                        />
                     </div>
                     <input className="button" type="submit" value="Abrir minha conta"/>
                 </form>
