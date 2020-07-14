@@ -14,7 +14,7 @@ const Routes = () =>
                 <BrowserRouter>
                     <Switch>
                         <Route path="/" exact component={App}/>
-                        <Route path="/" component={Register}/>
+                        <Route path="/register" component={Register}/>
                     </Switch>
                 </BrowserRouter>
             </MediaQuery>
