@@ -1,0 +1,18 @@
+@import "../../variables";
+
+div.card-list
+{
+    display: grid;
+    grid-gap: 16px;
+    list-style: none;
+    margin-bottom: 60px;
+
+    div.card
+    {
+        width: 100%;
+        background: #FFFFFF;
+        padding: 16px;
+        border-radius: 6px;
+        box-shadow: 0 1px 1px 0 rgba(66, 66, 66, 0.08), 0 1px 3px 1px rgba(66, 66, 66, 0.16);
+    }
+}

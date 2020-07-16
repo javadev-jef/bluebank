@@ -1,0 +1,51 @@
+@import "../style.scss";
+@import "../../../variables";
+
+div.card-list
+{
+    &.cl-select
+    {
+        grid-template-columns: repeat(7, 1fr); 
+        grid-template-rows: 128px; 
+    }
+
+    div.card
+    {
+        &.c-select
+        {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            cursor: pointer;
+            transition: all 500ms;
+            color: rgba(51, 51, 51, 1);
+
+            svg.icon
+            {
+                color: rgba(51, 51, 51, 0.7);
+                font-size: 42px;
+                margin-bottom: 10px;
+                transition: all 500ms;
+            }
+
+            span
+            {
+                margin-top: 4px;
+                font-weight: 600;
+            }
+
+            &:hover
+            {
+                color: $colorPrimary;
+                filter: brightness(98%);
+
+                svg.icon
+                {
+                    color: $colorPrimary;
+                }
+            }
+        }
+    }
+}
