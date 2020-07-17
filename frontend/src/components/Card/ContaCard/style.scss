@@ -1,0 +1,30 @@
+@import "../style.scss";
+@import "../../../variables";
+
+div.card-list
+{
+    div.card
+    {
+        &.c-conta
+        {
+            max-width: 210px;
+            display: flex;
+            flex-direction: column;
+
+            .blur-filter
+            {
+                filter: blur(4px);
+            }
+
+            strong::after
+            {
+                content: " ";
+            }
+
+            span:not(:first-child)
+            {
+                margin-top: 4px;
+            }
+        }
+    }
+}

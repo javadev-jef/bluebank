@@ -1,0 +1,49 @@
+@import "../../variables";
+
+header.navbar
+{
+    display: flex;
+    align-items: center;
+
+    span.welcome
+    {
+        font-size: 20px;
+        margin-left: 24px;
+    }
+
+    .button
+    {
+        width: auto;
+        min-width: 140px;
+        margin-left: auto;
+        margin-top: 0;
+        background: rgba($colorPrimary, 1);
+        transition: all 500ms;
+
+        svg
+        {
+            font-size: 20px;
+        }
+    }
+
+    button.btn-logout
+    {
+        width: 60px;
+        height: 60px;
+        border-radius: 6px;
+        border: 1px #DCDCE6 solid;
+        color: $colorPrimary;
+        margin-left: 16px;
+        transition: border-color 500ms;
+        transition: color 800ms;
+        background: #F2F2F2;
+        transition: background-color 500ms;
+    
+        &:hover
+        {
+            color:#FF0000;
+            border-color:#d8d8d8;
+            background: rgba(216, 216, 216, 0.3);
+        }
+    }
+}
