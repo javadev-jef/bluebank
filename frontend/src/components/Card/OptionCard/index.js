@@ -7,7 +7,7 @@ const OptionCard = ({children, title}) =>
     return(
         <>
             <h3>{title}</h3>
-            <div className="card-list cl-select">
+            <div className="card-list">
                 {children}  
             </div>
         </>

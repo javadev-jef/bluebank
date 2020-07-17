@@ -1,16 +1,16 @@
 import React, { useState } from "react";
-import {AiFillEye, AiFillEyeInvisible} from "react-icons/ai";
+import {AiOutlineEye, AiOutlineEyeInvisible} from "react-icons/ai";
 
 import "./style.scss";
 
 const ContaCard = ({children, title, handleShowSaldo}) =>
 {
-    const [show, setShow] = useState(false);
+    const [isShow, setisShow] = useState(false);
 
     const handleSaldo = () =>
     {
-        // TODO: Implementar Hook para gravar o "show" via JWT/localStorage
-        setShow(!show);
+        // TODO: Implementar Hook para gravar o "isShow" via JWT/localStorage
+        setisShow(!isShow);
         return handleShowSaldo();
     }
     
@@ -18,10 +18,10 @@ const ContaCard = ({children, title, handleShowSaldo}) =>
         <>
             <h3>{title}
             {
-                show ? <AiFillEye onClick={handleSaldo} /> : <AiFillEyeInvisible onClick={handleSaldo} />
+                isShow ? <AiOutlineEye onClick={handleSaldo} /> : <AiOutlineEyeInvisible onClick={handleSaldo} />
             }
             </h3>
-            <div className="card-list cl-conta">
+            <div className="card-list">
                 {children}
             </div>
         </>

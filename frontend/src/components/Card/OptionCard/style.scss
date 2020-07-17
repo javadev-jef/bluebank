@@ -3,17 +3,16 @@
 
 div.card-list
 {
-    &.cl-select
-    {
-        grid-template-columns: repeat(7, 1fr); 
-        grid-template-rows: 128px; 
+    a{
+        display: contents;   
     }
 
     div.card
     {
         &.c-select
         {
-            height: 100%;
+            max-width: 140px;
+            height: 128px !important;
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
