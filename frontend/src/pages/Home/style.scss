@@ -1,0 +1,16 @@
+
+@import "../../variables";
+
+body
+{
+    overflow: auto;
+}
+
+div.home-container
+{
+    width: 100%;
+    max-width: 1120px;
+    margin: 32px auto;
+    -webkit-animation: fade-in 1.2s cubic-bezier(0.390, 0.575, 0.565, 1.000) both;
+	        animation: fade-in 1.2s cubic-bezier(0.390, 0.575, 0.565, 1.000) both;
+}
