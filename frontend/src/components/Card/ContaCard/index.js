@@ -3,7 +3,7 @@ import {AiOutlineEye, AiOutlineEyeInvisible} from "react-icons/ai";
 
 import "./style.scss";
 
-const ContaCard = ({children, title, handleShowSaldo}) =>
+const ContaCard = ({children, title = null, handleShowSaldo}) =>
 {
     const [isShow, setisShow] = useState(false);
 
@@ -16,11 +16,11 @@ const ContaCard = ({children, title, handleShowSaldo}) =>
     
     return(
         <>
-            <h3>{title}
-            {
-                isShow ? <AiOutlineEye onClick={handleSaldo} /> : <AiOutlineEyeInvisible onClick={handleSaldo} />
+            {title !== null &&
+                <h3>{title}
+                    {isShow ? <AiOutlineEye onClick={handleSaldo} /> : <AiOutlineEyeInvisible onClick={handleSaldo} />}
+                </h3>
             }
-            </h3>
             <div className="card-list">
                 {children}
             </div>
