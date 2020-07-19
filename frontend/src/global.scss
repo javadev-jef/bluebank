@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@200;300;400;500;600;700&display=swap');
 @import "./variables";
+@import "./sass/rsuite_custom";
 @import "./sass/animations";
 
 *{
@@ -20,7 +21,18 @@ body
 input, button, textarea, select
 {
     font-family: 'Exo 2', sans-serif;
-    font-size: 18px;
+    font-size: $fontSizeInput;
+
+    &:not(button)
+    {
+        background: $inputBackgroundColor;
+    }
+
+    &:disabled
+    {
+        opacity: 0.3;
+        cursor: not-allowed;
+    }
 }
 
 button, input[type=submit], select
@@ -30,7 +42,7 @@ button, input[type=submit], select
 
 a
 {
-    text-decoration: none;
+    text-decoration: none !important;
 }
 
 h3
@@ -38,6 +50,7 @@ h3
     display: inline-flex;
     align-items: flex-end;
     margin-bottom: 6px;
+    font-size: 1.17em;
 
     svg
     {
@@ -84,11 +97,11 @@ form
     {
         width: 100%;
         min-width: 120px;
-        height: 60px;
+        height: 60px !important;
         color: #333;
-        border:1px #dcdce6 solid !important;
-        border-radius: 8px;
-        padding: 0 12px;
+        border: $inputBorder;
+        border-radius: $inputBorderRadius;
+        padding: $inputPadding;
 
         &:not(:first-child), &:not(.input-group)
         {
@@ -116,25 +129,26 @@ main
 {
     width: 100%;
     height: 60px;
-    background: $colorPrimary;
+    background: $colorPrimary !important;
     border-radius: 8px;
     border: 0;
     font-weight: bold;
     margin-top: 16px;
     color: #FFF;
-    transition: filter 500ms;
+    transition: background-color 500ms;
     display: flex;
     align-items: center;
     justify-content: center;
-    text-decoration: none;
+    text-decoration: none !important;
     text-align: center;
     line-height: 60px;
     font-size: 18px;
     padding: 0 16px;
 
-    &:hover
+    &:hover, &:focus
     {
-        filter: brightness(90%);
+        color: #FFF;
+        background: $colorPrimaryDark !important;
     }
 }
 
@@ -167,6 +181,36 @@ h1
         span.part-02
         {
             font-weight: 400;
+        }
+    }
+}
+
+fieldset
+{
+    border: 2px #D8D8D8 solid;
+    padding: 16px;
+    border-radius: 6px;
+    margin-bottom: 24px;
+
+    legend
+    {
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    form
+    {
+        display: flex;
+
+        input, select, .rs-datepicker-custom, .button
+        {
+            width: auto;
+            margin: 0 !important;
+
+            &:not(:first-child)
+            {
+                margin-left: 8px !important;
+            }
         }
     }
 }

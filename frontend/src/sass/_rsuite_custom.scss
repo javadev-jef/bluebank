@@ -1,0 +1,93 @@
+@import "../variables";
+
+h3
+{
+    line-height: normal;
+}
+
+.rs-datepicker-custom
+{
+    display: flex;
+
+    &.rs-picker-daterange
+    {
+        min-width: 300px;
+    }
+
+    a.rs-btn
+    {
+        background: $inputBackgroundColor !important;
+        display: flex !important;
+        min-width: 180px;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 12px !important;
+        font-size: $fontSizeInput;
+        border: $inputBorder;
+        border-radius: $inputBorderRadius !important;
+
+        &:hover
+        {
+            border-color: initial;
+        }
+
+        span
+        {
+           color: unset !important;
+           position: unset;
+
+            &:not(:first-child)
+            {
+                margin-left: 8px;
+            }
+        }
+    }
+}
+
+.rs-table
+{
+    border-radius: 8px 8px 0 0;
+    color: #333;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+
+    .rs-table-row-header
+    {
+        border-radius: 8px 8px 0 0;
+
+        &, .rs-table-cell-content
+        {
+            font-size: 15px;
+            color: #333;
+            background: rgba(242, 242, 242, 0.5);
+        }
+    }
+
+    .rs-table-row:nth-of-type(even)
+    {
+        .rs-table-cell
+        {
+            background: transparent;
+        }
+        background: rgba(242, 242, 242, 0.2);
+    }
+}
+
+.rs-table-pagination-toolbar
+{
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+    background: rgba(242, 242, 242, 0.5);
+    border-radius: 0 0 8px 8px;
+    
+    span
+    {
+        color: #333 !important;
+    }
+}
+
+.button
+{
+    &:active
+    {
+        color: #FFF !important;
+    }
+}
