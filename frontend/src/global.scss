@@ -1,6 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@200;300;400;500;600;700&display=swap');
 @import "./variables";
-@import "./sass/rsuite_custom";
 @import "./sass/animations";
 
 *{
@@ -18,9 +17,9 @@ body
     background: $backgroundColor;
 }
 
-input, button, textarea, select
+input, button, textarea, select, .mui-datepicker-custom
 {
-    font-family: 'Exo 2', sans-serif;
+    font-family: $inputFontFamily;
     font-size: $fontSizeInput;
 
     &:not(button)
@@ -109,13 +108,21 @@ form
         }
     }
 
+    .input-error
+    {
+        box-shadow: 0px 0px 3px 0px rgba(255, 0, 0, 1);
+        border: none;
+        -webkit-animation: shake-horizontal 0.8s cubic-bezier(0.455, 0.030, 0.515, 0.955) 100ms both;
+        animation: shake-horizontal 0.8s cubic-bezier(0.455, 0.030, 0.515, 0.955) 100ms both;
+    }
+
     div.input-group
     {
         display: flex;
 
-        input:not(:first-child), select:not(:first-child)
+        *:not(:first-child)
         {
-            margin-left: 8px;
+            margin-left: 8px !important;
         }
     }
 }
@@ -129,9 +136,9 @@ main
 {
     width: 100%;
     height: 60px;
-    background: $colorPrimary !important;
+    background: $colorPrimary;
     border-radius: 8px;
-    border: 0;
+    border: 1px $colorPrimaryDark solid;
     font-weight: bold;
     margin-top: 16px;
     color: #FFF;
@@ -148,7 +155,26 @@ main
     &:hover, &:focus
     {
         color: #FFF;
-        background: $colorPrimaryDark !important;
+        background: $colorPrimaryDark;
+    }
+}
+
+.button-cancel
+{
+    @extend .button;
+    background: rgba(51, 51, 51, 0.3);
+    border: 1px rgba(51, 51, 51, 0.2) solid;
+
+    &:hover, &:focus
+    {
+        color: #FFF;
+        background: rgba(51, 51, 51, 0.4);
+    }
+
+    &.disabled
+    {
+        opacity: 0.3;
+        cursor: not-allowed;
     }
 }
 
@@ -192,6 +218,16 @@ fieldset
     border-radius: 6px;
     margin-bottom: 24px;
 
+    input, select, .button, .mui-datepicker-custom
+    {
+        margin: 0 !important;
+
+        &:not(:first-child)
+        {
+            margin-left: 8px !important;
+        }
+    }
+
     legend
     {
         font-size: 18px;
@@ -201,16 +237,5 @@ fieldset
     form
     {
         display: flex;
-
-        input, select, .rs-datepicker-custom, .button
-        {
-            width: auto;
-            margin: 0 !important;
-
-            &:not(:first-child)
-            {
-                margin-left: 8px !important;
-            }
-        }
     }
 }

@@ -6,6 +6,7 @@ import ResolutionError from "./pages/ResolutionError";
 import Register from "./pages/Register";
 import Home from "./pages/Home";
 import Statement from "./pages/Statement";
+import Transfer from "./pages/Transfer";
 
 const Routes = () =>
 {
@@ -19,6 +20,7 @@ const Routes = () =>
                         <Route path="/register" component={Register}/>
                         <Route path="/home" component={Home}/>
                         <Route path="/statement" component={Statement}/>
+                        <Route path="/transfer" exact component={Transfer}/>
                     </Switch>
                 </BrowserRouter>
             </MediaQuery>
