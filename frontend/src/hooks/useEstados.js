@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import {IBGE_ESTADOS} from "../constants";
+import {IBGE_ESTADOS} from "../constants/constants.js";
 
 
 export const useEstados = () =>
