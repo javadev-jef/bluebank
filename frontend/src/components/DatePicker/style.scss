@@ -1,0 +1,40 @@
+@import "../../variables";
+
+.mui-datepicker-custom
+{
+    width: 200px !important;
+    min-width: 200px;
+    height: 60px !important;
+    border: $inputBorder !important;
+    border-radius: $inputBorderRadius;
+    padding: 0 !important;
+    background-color: #E6E6E6 !important;
+
+    &:not(:first-child), &:not(.input-group)
+    {
+        margin-top: 8px;
+    }
+
+    .MuiInput-root
+    {
+        height: 100%;
+        input
+        {
+            padding: $inputPadding;
+            background: #FFF;
+            height: 100% !important;
+            font-size: 18px;
+            box-sizing: border-box !important;
+            font-family: $inputFontFamily;
+            margin: 0;
+            border: none !important;
+            border-radius: 8px 0px 0px 8px;
+            border-right: $inputBorder;
+        }
+
+        .MuiInputAdornment-positionEnd
+        {
+            margin: 0;
+        }
+    }
+}
