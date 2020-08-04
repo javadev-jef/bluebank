@@ -1,0 +1,18 @@
+@import "../../variables";
+@import "../../sass/animations";
+
+.mui-datatable-custom
+{
+    font-family: 'Exo 2', sans-serif !important;
+
+    .MuiTypography-body2, .MuiInputBase-root, .MuiTypography-h6 
+    {
+        font-family: unset;
+    }
+
+    tr
+    {
+        -webkit-animation: fade-in 600ms cubic-bezier(0.390, 0.575, 0.565, 1.000);
+                animation: fade-in 600ms cubic-bezier(0.390, 0.575, 0.565, 1.000);
+    }
+}
