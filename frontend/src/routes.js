@@ -7,12 +7,23 @@ import Register from "./pages/Register";
 import Home from "./pages/Home";
 import Statement from "./pages/Statement";
 import Transfer from "./pages/Transfer";
+import { ThemeProvider, createMuiTheme } from "@material-ui/core";
 
 const Routes = () =>
 {
+    const theme = createMuiTheme(
+    {
+        palette: 
+        {
+            primary: 
+            {
+                main: "#0091EA"
+            },
+        },
+    });
     
     return(
-        <>
+        <ThemeProvider theme={theme}>
             <MediaQuery minDeviceWidth={800}>
                 <BrowserRouter>
                     <Switch>
@@ -27,7 +38,7 @@ const Routes = () =>
             <MediaQuery maxDeviceWidth={799}>
                 <ResolutionError />
             </MediaQuery>  
-        </>
+        </ThemeProvider>
     );
 }
 

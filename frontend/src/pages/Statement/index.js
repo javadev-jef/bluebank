@@ -1,61 +1,90 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Navbar from "../../components/Navbar";
 
 import "./style.scss";
-import ContaCard from "../../components/Card/ContaCard";
-import ItemConta from "../../components/Card/ContaCard/ItemConta";
-import { DateRangePicker, Button } from 'rsuite';
-import 'rsuite/dist/styles/rsuite-default.css';
-import {LOCALE_RSDATE, DATE_FORMAT} from "../../constants";
 import StatementListTable from "../../components/StatementListTable";
 import { useStatements } from "../../hooks/useStatements";
+import { CircularProgress } from "@material-ui/core";
+import {formatCurrencyValue} from "../../utils/functionUtils";
+import AlertMessage from "../../components/AlertMessage";
+import StatementForm from "../../components/StatementForm";
+
 
 export default function Statement()
 {
     const statements = useStatements();
+    const [alertProps, setAlertProps] = useState({open: false});
 
-    const [isShowSaldo, setIsShowSaldo] = useState(false);
-
-    const handleVisibleSaldo = () =>
-    {
-        setIsShowSaldo(!isShowSaldo);
+    const progressStyle = {
+        marginLeft: 4,
+        marginBottom: -1,
+        display: !statements.loading && "none"
     }
     
-    const onSubmitHandler = (event) =>
+    const onFormSuccess = (data) =>
     {
-        event.preventDefault();
+        console.log(data);
         statements.fetch();
     }
+
+    const onErrorForm = useCallback((errors) =>
+    {
+        if(Object.entries(errors).length > 0)
+        {
+            setAlertProps({type: "error", message: "Todos os campos em destaque são obrigatórios.", open: true});
+            console.log(errors);
+        }
+    }, []);
+
+    useEffect(() =>
+    {
+        const response = statements.response;
+        response.msg != null && setAlertProps({type: response.type, message: response.msg, open: true});
+    }, 
+    [statements.response])
 
     return(
         <div className="statement-container">
             <Navbar />
             <main>
-                <ContaCard title="Saldo em conta" handleShowSaldo={handleVisibleSaldo}>
-                    <ItemConta label="CC" numConta="1234-1" valueConta="R$ 100,00" show={isShowSaldo}/>
-                </ContaCard>
                 <fieldset>
-                    <legend>Período</legend>
-                    <form action="GET" onSubmit={onSubmitHandler}>
-                        <select disabled={statements.loading}>
-                            <option value="" disabled>Conta</option>
-                            <option value="CP">Poupança</option>
-                            <option value="CC">Corrente</option>
-                        </select>
-
-                        <DateRangePicker 
-                            disabled={statements.loading}
-                            placeholder="Periodo" 
-                            className="rs-datepicker-custom" 
-                            locale={LOCALE_RSDATE} 
-                            format={DATE_FORMAT}
-                        />
-
-                        <Button className="button" type="submit" loading={statements.loading}>Buscar</Button>
-                    </form>
+                    <legend>Resumo</legend>
+                    <div className="span-group">
+                        <span>1234</span>
+                        <span>Conta Corrente</span>
+                    </div>
+                    <div className="span-group">
+                        <span style={{color: "green"}}>R$ 1.500,26</span>
+                        <span>Saldo Atual</span>
+                    </div>
+                    <div className="span-group">
+                        <span style={{color: "red"}}>
+                            {formatCurrencyValue(statements.allDebits)}
+                            <CircularProgress size={14} style={progressStyle}/></span>
+                        <span>Débitos por periodo</span>
+                    </div>
+                    <div className="span-group">
+                        <span style={{color: "blue"}}>
+                            {formatCurrencyValue(statements.allCredits)}
+                            <CircularProgress size={14} style={progressStyle}/>
+                        </span>
+                        <span>Créditos por periodo</span>
+                    </div>
                 </fieldset>
+
+                <StatementForm onSuccess={onFormSuccess} onError={onErrorForm} loading={statements.loading}/>
+
                 <StatementListTable statements={statements}/>
             </main>
+            <AlertMessage
+                maxWidth={450}
+                open={alertProps.open}
+                autoHideDuration={8000} 
+                severity={alertProps.type}
+                message={alertProps.message}
+                anchorOrigin={{vertical: "bottom", horizontal: "left"}}
+                onClose={() => setAlertProps({...alertProps, open: false})}
+            />
         </div>
     );
 }
