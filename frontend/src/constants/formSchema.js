@@ -18,6 +18,15 @@ yup.setLocale({
     }
 });
 
+export const statementForm = (initialDate, finalDate) =>  yupResolver(
+    yup.object().shape(
+    {
+        accountType: yup.number().required().integer().isSelected().positive(),
+        initialDate: yup.string().required().isDateValid().validateInitialDate(finalDate),
+        finalDate: yup.string().required().isDateValid().validateFinalDate(initialDate),
+    })
+);
+
 export const transferForm = (minDate) => yupResolver(
     yup.object().shape(
     {
@@ -33,6 +42,22 @@ export const transferForm = (minDate) => yupResolver(
         transferDate: yup.string().required().isDateValid().minDate(minDate),
     })
 );
+
+yup.addMethod(yup.string, "validateFinalDate", function(initialDate)
+{
+    return this.test("validateFinalDate", FORM_ERROR_MESSAGES.invalidFinalDate, (value) => 
+    {
+        return moment(value, DATE_FORMAT, true).diff(initialDate, "days", true) >= 0;
+    })
+});
+
+yup.addMethod(yup.string, "validateInitialDate", function(finalDate)
+{
+    return this.test("validateInitialDate", FORM_ERROR_MESSAGES.invalidInitialDate, (value) => 
+    {
+        return moment(value, DATE_FORMAT, true).diff(finalDate, "days", true) <= 0;
+    })
+});
 
 yup.addMethod(yup.string, "optionalStr", function(minLength)
 {
@@ -54,7 +79,7 @@ yup.addMethod(yup.string, "minDate", function(minDate)
 {
     return this.test("minDate", FORM_ERROR_MESSAGES.minDate, (value) => 
     {
-        return moment(value, DATE_FORMAT, true).diff(minDate, "days") >= 0;
+        return moment(value, DATE_FORMAT, true).diff(minDate, "days", true) >= 0;
     })
 });
 
@@ -62,7 +87,7 @@ yup.addMethod(yup.string, "maxDate", function(maxDate)
 {
     return this.test("maxDate", FORM_ERROR_MESSAGES.maxDate, (value) => 
     {
-        return this.isDateValid() && moment(maxDate, DATE_FORMAT, true).diff(moment(value, DATE_FORMAT, true), "days") >= 0;
+        return this.isDateValid() && moment(maxDate, DATE_FORMAT, true).diff(moment(value, DATE_FORMAT, true), "days", true) >= 0;
     })
 });
 
