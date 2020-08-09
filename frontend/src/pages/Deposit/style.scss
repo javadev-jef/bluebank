@@ -1,0 +1,100 @@
+@import "../../variables";
+
+div.deposit-container
+{
+    width: 100%;
+    max-width: 1180px;
+    padding: 0 30px;
+    margin: 32px auto;
+    height: calc(100vh - 64px); 
+    align-items: center;
+    justify-content: center;
+
+    main
+    {
+        display: flex;
+        justify-content: space-between;
+
+        &:not(&.content)
+        {
+            -webkit-animation: fade-in 1.2s cubic-bezier(0.390, 0.575, 0.565, 1.000) both;
+                    animation: fade-in 1.2s cubic-bezier(0.390, 0.575, 0.565, 1.000) both;
+        }
+
+        form
+        {
+            max-width: 600px;
+            min-width: 600px;
+        }
+
+        section
+        {
+            margin-right: 40px;
+
+            h2
+            {
+                margin-bottom: 20px;
+            }
+
+            p, ol
+            {
+                font-size: 18px;
+                margin-bottom: 20px;
+            }
+
+            ol{padding-left: 18px}
+
+            img
+            {
+                width: 320px;
+            }
+        }
+
+        &.content
+        {
+            width: 100%;
+            padding: 40px;
+            background: $backgroundColor;
+            box-shadow: 0 0 100px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 500ms;
+            -webkit-animation: slide-in-left 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+            animation: slide-in-left 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+
+            section
+            {
+                h2:not(.logo)
+                {
+                    font-size: 30px;
+                }
+            }
+        }
+    }
+}
+
+// Media Screen
+@media screen and (max-width: 1090px)
+{
+    div.deposit-container
+    {
+        main
+        {
+            flex-direction: column;
+            align-items: center;
+
+            section
+            {
+                p, ol, img
+                {
+                    display: none;
+                }
+
+                width: 600px;
+                margin: 0;
+            }
+        }
+    }
+}

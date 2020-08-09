@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import Statement from "./pages/Statement";
 import Transfer from "./pages/Transfer";
 import { ThemeProvider, createMuiTheme } from "@material-ui/core";
+import Deposit from "./pages/Deposit";
 
 const Routes = () =>
 {
@@ -32,6 +33,7 @@ const Routes = () =>
                         <Route path="/home" component={Home}/>
                         <Route path="/statement" component={Statement}/>
                         <Route path="/transfer" exact component={Transfer}/>
+                        <Route path="/deposit" exact component={Deposit} />
                     </Switch>
                 </BrowserRouter>
             </MediaQuery>
