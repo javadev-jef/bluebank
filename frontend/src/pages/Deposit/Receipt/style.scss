@@ -1,0 +1,122 @@
+@import "../../../variables";
+
+div.receipt-container
+{
+    width: 100%;
+    min-width: 700px;
+    max-width: 830px;
+    min-height: 250px;
+    display: flex;
+    border-radius: 8px;
+
+    div.side-left
+    {
+        width: 220px;
+        background-color: $colorPrimary;
+        color: #FFF;
+        padding: 16px;
+        border-radius: 8px 0 0 8px;
+
+        div.field-labels
+        {
+            display: flex;
+            flex-direction: column;
+            border-top: 1px rgba(255, 255, 255, 0.2) solid;
+            padding: 16px 0;
+
+            &.header
+            {
+                padding-top: 0;
+                border: none;
+                span.value{font-size: 22px}
+            }
+
+            span.label
+            {
+                font-size: 14px;
+                font-weight: 500;
+            }
+
+            span.value
+            {
+                font-size: 18px;
+                font-weight: 600;
+            }
+        }
+    }
+
+    div.side-right
+    {
+        flex: 1;
+        background-color: #FFF;
+        border-radius: 0 8px 8px 0;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+
+        span.date
+        {
+            font-weight: 600;
+            color: rgba(51, 51, 51, 0.5);
+            text-transform: capitalize;
+        }
+
+        header
+        {
+            border-bottom: 1px #e6e6e6 solid;
+            position: relative;
+
+            div.actions
+            {
+                display: inline-flex;
+                position: absolute;
+                top: 0px;
+                right: 0px;
+                font-size: 18px;
+                cursor: pointer;
+
+                svg{margin-left: 12px}
+            }
+        }
+
+        section
+        {
+            flex: 1;
+            position: relative;
+            padding: 12px 0;
+
+            h3
+            {
+                margin-bottom: 12px;
+            }
+
+            div.notes
+            {
+                font-size: 12px;
+                position: absolute;
+                bottom: 12px;
+            }
+        }
+        
+        footer
+        {
+            border-top: 1px #e6e6e6 solid;
+            color: $colorPrimary;
+            font-weight: 600;
+        }
+    }
+}
+
+@media print
+{
+    div.receipt-container
+    {
+        border: 1px #D8D8D8 solid;
+        margin: 24px auto;
+
+        div.actions
+        {
+            display: none !important;
+        }
+    }
+}
