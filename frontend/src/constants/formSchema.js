@@ -10,6 +10,7 @@ yup.setLocale({
     },
     number:{
         min: 'Deve ser maior que ${min}',
+        moreThan: "O valor informado deve ser maior que ${more}"
     },
     string:{
         min: "Campo deve possuir no minimo ${min} caracter(es)",
@@ -17,6 +18,20 @@ yup.setLocale({
         max: "Este campo deve possuir no máximo ${max} caracter(es)",
     }
 });
+
+export const depositForm = () =>  yupResolver(
+    yup.object().shape(
+    {
+        recipientAccount: yup.string().required().length(4),
+        recipientAccountType: yup.number().required().integer().isSelected().positive(),
+        recipientName: yup.string().required().min(4),
+        depositorName: yup.string().required().min(4),
+        depositorNumPersonType: yup.string().required().min(11).max(12),
+        depositorPhone: yup.string().required().min(14).max(16),
+        depositType: yup.number().required().integer().isSelected().positive(),
+        depositValue: yup.number().typeError(FORM_ERROR_MESSAGES.strToNumberError).required().moreThan(0)
+    })
+);
 
 export const statementForm = (initialDate, finalDate) =>  yupResolver(
     yup.object().shape(
