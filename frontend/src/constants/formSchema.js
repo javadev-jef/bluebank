@@ -19,6 +19,17 @@ yup.setLocale({
     }
 });
 
+export const withdrawForm = () =>  yupResolver(
+    yup.object().shape(
+    {
+        userAccountType: yup.number().required().integer().isSelected().positive(),
+        userName: yup.string().required().min(4),
+        withdrawType: yup.number().required().integer().isSelected().positive(),
+        withdrawValue: yup.number().typeError(FORM_ERROR_MESSAGES.strToNumberError).required().moreThan(0),
+        blueToken: yup.string().required().min(6),
+    })
+);
+
 export const depositForm = () =>  yupResolver(
     yup.object().shape(
     {
