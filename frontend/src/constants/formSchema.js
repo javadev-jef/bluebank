@@ -16,8 +16,23 @@ yup.setLocale({
         min: "Campo deve possuir no minimo ${min} caracter(es)",
         length: "Este campo deve possuir ${length} caracter(es)",
         max: "Este campo deve possuir no máximo ${max} caracter(es)",
+        email: "E-mail informado é inválido"
     }
 });
+
+export const registerForm = () =>  yupResolver(
+    yup.object().shape(
+    {
+        name: yup.string().required().min(4),
+        numPersonType: yup.string().required().min(11).max(12),
+        birthDate: yup.string().required().isDateValid().isAgeOfMajority(),
+        email: yup.string().required().email(),
+        state: yup.number().required().integer().isSelected().positive(),
+        city: yup.number().required().integer().isSelected().positive(),
+        password: yup.string().required().min(6),
+        passwordConfirm: yup.string().oneOf([yup.ref("password"), null], FORM_ERROR_MESSAGES.passwordConfirm)
+    })
+);
 
 export const withdrawForm = () =>  yupResolver(
     yup.object().shape(
@@ -69,6 +84,16 @@ export const transferForm = (minDate) => yupResolver(
     })
 );
 
+yup.addMethod(yup.string, "isAgeOfMajority", function()
+{
+    return this.test("isAgeOfMajority", FORM_ERROR_MESSAGES.ageOfMajority, (value) => 
+    {
+        const maxDate = moment(new Date(), DATE_FORMAT, true).subtract(18, "years");
+        //console.log(new Date(maxDate));
+        return this.isDateValid() && moment(maxDate, DATE_FORMAT, true).diff(moment(value, DATE_FORMAT, true), "days", true) >= 0;
+    })
+});
+
 yup.addMethod(yup.string, "validateFinalDate", function(initialDate)
 {
     return this.test("validateFinalDate", FORM_ERROR_MESSAGES.invalidFinalDate, (value) => 
@@ -105,7 +130,7 @@ yup.addMethod(yup.string, "minDate", function(minDate)
 {
     return this.test("minDate", FORM_ERROR_MESSAGES.minDate, (value) => 
     {
-        return moment(value, DATE_FORMAT, true).diff(minDate, "days", true) >= 0;
+        return moment(value, DATE_FORMAT, true).diff(minDate, "days") >= 0;
     })
 });
 

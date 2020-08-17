@@ -14,8 +14,8 @@ import "./style.scss";
 
 export default function DatePicker(props)
 {
-    const {onChange = (e) => {}, value, placeholder, disablePast, name, className, refForm} = props;
-    const {required, min, max, minLength, maxLength, pattern, validate, title} = props;
+    const {onChange = (e) => {}, value, placeholder, disablePast, name, className, refForm, maxDate} = props;
+    const {required, min, max, minLength, maxLength, pattern, validate, title, disableFuture} = props;
 
     return(
         <MuiPickersUtilsProvider utils={MomentUtils}>
@@ -23,6 +23,7 @@ export default function DatePicker(props)
                 name={name}
                 clearable
                 title={title}
+                maxDate={maxDate}
                 clearLabel={"Limpar"}
                 cancelLabel={"Cancelar"}
                 className={`mui-datepicker-custom ${className}`}
@@ -30,6 +31,7 @@ export default function DatePicker(props)
                 invalidDateMessage={null}
                 helperText={null}
                 disablePast={disablePast}
+                disableFuture={disableFuture}
                 inputVariant={"standard"}
                 value={value}
                 onChange={onChange}
