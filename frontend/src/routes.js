@@ -10,6 +10,7 @@ import Transfer from "./pages/Transfer";
 import { ThemeProvider, createMuiTheme } from "@material-ui/core";
 import Deposit from "./pages/Deposit";
 import Withdraw from "./pages/Withdraw";
+import Profile from "./pages/Profile";
 
 const Routes = () =>
 {
@@ -36,6 +37,7 @@ const Routes = () =>
                         <Route path="/transfer" exact component={Transfer}/>
                         <Route path="/deposit" exact component={Deposit} />
                         <Route path="/withdraw" exact component={Withdraw} />
+                        <Route path="/profile" exact component={Profile}/>
                     </Switch>
                 </BrowserRouter>
             </MediaQuery>

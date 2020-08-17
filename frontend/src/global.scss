@@ -101,11 +101,6 @@ form
         border: $inputBorder;
         border-radius: $inputBorderRadius;
         padding: $inputPadding;
-
-        &:not(:first-child), &:not(.input-group)
-        {
-            margin-top: 8px;
-        }
     }
 
     .input-error
