@@ -62,9 +62,9 @@ export const depositForm = () =>  yupResolver(
 export const statementForm = (initialDate, finalDate) =>  yupResolver(
     yup.object().shape(
     {
-        accountType: yup.number().required().integer().isSelected().positive(),
-        initialDate: yup.string().required().isDateValid().validateInitialDate(finalDate),
-        finalDate: yup.string().required().isDateValid().validateFinalDate(initialDate),
+        numAccount: yup.string().required(),
+        initialDate: yup.date().required().isDateValid(DATE_FORMAT).validateInitialDate(finalDate),
+        finalDate: yup.date().required().isDateValid(DATE_FORMAT).validateFinalDate(initialDate)
     })
 );
 
@@ -94,7 +94,7 @@ yup.addMethod(yup.string, "isAgeOfMajority", function()
     })
 });
 
-yup.addMethod(yup.string, "validateFinalDate", function(initialDate)
+yup.addMethod(yup.date, "validateFinalDate", function(initialDate)
 {
     return this.test("validateFinalDate", FORM_ERROR_MESSAGES.invalidFinalDate, (value) => 
     {
@@ -102,7 +102,7 @@ yup.addMethod(yup.string, "validateFinalDate", function(initialDate)
     })
 });
 
-yup.addMethod(yup.string, "validateInitialDate", function(finalDate)
+yup.addMethod(yup.date, "validateInitialDate", function(finalDate)
 {
     return this.test("validateInitialDate", FORM_ERROR_MESSAGES.invalidInitialDate, (value) => 
     {
@@ -124,6 +124,16 @@ yup.addMethod(yup.string, "isDateValid", function()
     {
         return moment(value, DATE_FORMAT, true).isValid();
     })
+});
+
+yup.addMethod(yup.date, "isDateValid", function(format)
+{
+    return this.transform(function(value, originalValue)
+    {
+        value = moment(originalValue, format, true);
+
+        return value.isValid() ? value.toDate() : null;
+    });
 });
 
 yup.addMethod(yup.string, "minDate", function(minDate)

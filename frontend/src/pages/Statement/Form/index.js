@@ -1,26 +1,45 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Grid } from "@material-ui/core";
-import Select from "../Select";
-import DatePicker from "../DatePicker";
+import Select from "../../../components/Select";
 import { useForm } from "react-hook-form";
-import { getInitialDateOfMonth, getFinalDateOfMonth } from "../../utils/functionUtils";
-import { statementForm } from "../../constants/formSchema";
+import { getInitialDateOfMonth, getFinalDateOfMonth } from "../../../utils/functionUtils";
+import { statementForm } from "../../../constants/formSchema";
+import { API_ENDPOINT } from "../../../constants/constants";
+import axios from "axios";
+import DatePicker from "../../../components/DatePicker";
 
-const StatementForm = ({onSuccess = () => {}, onError = () => {}, loading}) =>
+const Form = ({onSuccess = () => {}, onError = () => {}, loading, onChangeAccount = () =>{}}) =>
 {
     const [initialDateTemp, setInitialDateTemp] = useState(getInitialDateOfMonth());
-    const [selectFinalDateTemp, setSelectFinalDateTemp] = useState(getFinalDateOfMonth());
+    const [finalDateTemp, setFinalDateTemp] = useState(getFinalDateOfMonth());
+    const [userAccountTypes, setUserAccountTypes] = useState([]);
     
-    const {register, handleSubmit, errors, clearErrors} = useForm(
+    const {register, handleSubmit, errors, clearErrors, getValues} = useForm(
     {
-        resolver: statementForm(initialDateTemp, selectFinalDateTemp), 
+        resolver: statementForm(initialDateTemp, finalDateTemp), 
         reValidateMode: "onSubmit",
     });
 
-    const accountTypes = [
-        {id: 1, description: "Corrente"},
-        {id: 2, description: "Poupança"}
-    ];
+    const listUserAccounts = useCallback(async () =>
+    {
+        try
+        {
+            const response = await axios.get(`${API_ENDPOINT}/user/accounts`);
+            setUserAccountTypes(response.data);
+            console.log(response);
+
+            onChangeAccount(getValues("numAccount"));
+        }
+        catch(error)
+        {
+            console.log(error);
+        }
+    }, [getValues, onChangeAccount]);
+
+    useEffect(()=>
+    {
+        listUserAccounts();
+    }, [listUserAccounts])
 
     useEffect(()=>
     {
@@ -36,11 +55,14 @@ const StatementForm = ({onSuccess = () => {}, onError = () => {}, loading}) =>
 
                     <Grid item xs={2}>
                         <Select 
-                            name="accountType"
-                            data={accountTypes}
+                            name="numAccount"
+                            data={userAccountTypes}
                             refForm={register}
-                            title={errors.accountType?.message}
-                            className={errors.accountType && "input-error"}
+                            valueName="numAccount"
+                            labelName="accountTypeDisplayName"
+                            title={errors.numAccount?.message}
+                            className={errors.numAccount && "input-error"}
+                            onChange={e => onChangeAccount(e.target.value)}
                         />
                     </Grid>
 
@@ -61,8 +83,8 @@ const StatementForm = ({onSuccess = () => {}, onError = () => {}, loading}) =>
                             placeholder="Data Final"
                             refForm={register}
                             name="finalDate"
-                            value={selectFinalDateTemp}
-                            onChange={setSelectFinalDateTemp}
+                            value={finalDateTemp}
+                            onChange={setFinalDateTemp}
                             title={errors.finalDate?.message}
                             className={errors.finalDate && "input-error"}
                         />
@@ -87,4 +109,4 @@ const StatementForm = ({onSuccess = () => {}, onError = () => {}, loading}) =>
     );
 }
 
-export default StatementForm;
+export default Form;

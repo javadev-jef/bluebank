@@ -16,6 +16,8 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import br.com.bluebank.domain.Account.Account;
 import lombok.Getter;
 import lombok.Setter;
@@ -53,7 +55,7 @@ public class Movement implements Serializable
     @Min(value = 0, message = "Não é permitido valores negativos")
     private BigDecimal balance = BigDecimal.ZERO;
 
-    @ManyToOne
+    @ManyToOne @JsonIgnore
     @JoinColumn(name = "num_account", nullable = false)
     private Account account;
 

@@ -7,13 +7,14 @@ import { useStatements } from "../../hooks/useStatements";
 import { CircularProgress } from "@material-ui/core";
 import {formatCurrencyValue} from "../../utils/functionUtils";
 import AlertMessage from "../../components/AlertMessage";
-import StatementForm from "../../components/StatementForm";
+import Form from "./Form";
 
 
 export default function Statement()
 {
     const statements = useStatements();
     const [alertProps, setAlertProps] = useState({open: false});
+    const [currentAccount, setCurrentAccount] = useState(0);
 
     const progressStyle = {
         marginLeft: 4,
@@ -24,7 +25,7 @@ export default function Statement()
     const onFormSuccess = (data) =>
     {
         console.log(data);
-        statements.fetch();
+        statements.fetch(data);
     }
 
     const onErrorForm = useCallback((errors) =>
@@ -43,26 +44,38 @@ export default function Statement()
     }, 
     [statements.response])
 
+    useEffect(()=>
+    {
+        statements.clearStatement();
+    }, // eslint-disable-next-line react-hooks/exhaustive-deps
+    [currentAccount]);
+
     return(
         <div className="statement-container">
             <Navbar />
             <main>
                 <fieldset>
                     <legend>Resumo</legend>
+
                     <div className="span-group">
-                        <span>1234</span>
-                        <span>Conta Corrente</span>
+                        <span>{currentAccount}</span>
+                        <span>Nº Conta</span>
                     </div>
+
                     <div className="span-group">
-                        <span style={{color: "green"}}>R$ 1.500,26</span>
+                        <span style={{color: "green"}}>
+                            {formatCurrencyValue(statements.balance)}
+                        </span>
                         <span>Saldo Atual</span>
                     </div>
+
                     <div className="span-group">
                         <span style={{color: "red"}}>
                             {formatCurrencyValue(statements.allDebits)}
                             <CircularProgress size={14} style={progressStyle}/></span>
                         <span>Débitos por periodo</span>
                     </div>
+
                     <div className="span-group">
                         <span style={{color: "blue"}}>
                             {formatCurrencyValue(statements.allCredits)}
@@ -70,12 +83,19 @@ export default function Statement()
                         </span>
                         <span>Créditos por periodo</span>
                     </div>
+
                 </fieldset>
 
-                <StatementForm onSuccess={onFormSuccess} onError={onErrorForm} loading={statements.loading}/>
+                <Form 
+                    onSuccess={onFormSuccess} 
+                    onError={onErrorForm} 
+                    loading={statements.loading}
+                    onChangeAccount={setCurrentAccount}
+                />
 
                 <StatementListTable statements={statements}/>
             </main>
+            
             <AlertMessage
                 maxWidth={450}
                 open={alertProps.open}

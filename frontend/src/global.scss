@@ -101,6 +101,7 @@ form
         border: $inputBorder;
         border-radius: $inputBorderRadius;
         padding: $inputPadding;
+        padding-right: 6px !important;
     }
 
     .input-error

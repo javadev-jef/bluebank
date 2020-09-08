@@ -3,6 +3,8 @@ export const IBGE_ESTADOS = "https://servicodados.ibge.gov.br/api/v1/localidades
 
 export const IBGE_CIDADES = (idEstado) => `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${idEstado}/municipios`;
 
+export const API_ENDPOINT = "http://localhost:8080/api";
+
 export const DATE_FORMAT = "DD/MM/YYYY";
 
 export const FORM_ERROR_MESSAGES = {

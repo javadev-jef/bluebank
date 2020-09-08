@@ -14,6 +14,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import br.com.bluebank.application.utils.StringUtils;
 import br.com.bluebank.domain.Movement.Movement;
 import br.com.bluebank.domain.User.User;
@@ -34,10 +36,11 @@ public class Account implements Serializable
     @NotNull(message = "O tipo da conta não foi selecionado")
     private AccountType accountType;
 
-    @ManyToOne
+    @ManyToOne @JsonIgnore
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "account")
     private List<Movement> movements = new ArrayList<>();
 
@@ -58,6 +61,11 @@ public class Account implements Serializable
         seq++;
 
         this.numAccount = month + day + seq;
+    }
+
+    public String getAccountTypeDisplayName()
+    {
+        return this.accountType.displayName;
     }
    
    

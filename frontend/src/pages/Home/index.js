@@ -28,7 +28,7 @@ export default function Home()
                     <ItemConta label="CP" numConta="4321-2" valueConta="R$ 9.942,41" show={isShowSaldo}/>
                 </ContaCard>
                 <OptionCard title="Menu">
-                    <Item label="Extrato" Icon={RiWallet3Line} to="/extrato" />
+                    <Item label="Extrato" Icon={RiWallet3Line} to="/statement" />
                     <Item label="Transferência" Icon={RiExchangeDollarLine} to="/transferencia" />
                     <Item label="Deposito" Icon={RiMoneyDollarCircleLine} to="/deposito" />
                     <Item label="Saque" Icon={RiHandCoinLine} to="/saque" />

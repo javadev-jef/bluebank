@@ -5,6 +5,7 @@ import { formatCurrencyValue } from "../../utils/functionUtils";
 import "./style.scss";
 import { CircularProgress, Backdrop } from "@material-ui/core";
 import { TABLE_THEME, TABLE_TEXT_LABEL, DOWNLOAD_TABLE_CONFIG, DOWNLOAD_TABLE_OPTIONS } from "../../constants/constants";
+import moment from "moment";
 
 const StatementListTable = ({statements}) =>
 {
@@ -14,12 +15,20 @@ const StatementListTable = ({statements}) =>
         customBodyRender: value => formatCurrencyValue(value),
     };
 
+    const dateColumns = {
+        customBodyRender: value => moment(value).format("DD/MM/YYYY HH:mm"),
+    }
+
+    const typeColumn = {
+        customBodyRender: value => value < 0 ? "Débito" : "Crédito",
+    }
+
     const headers = [
         {name: "description", label: "Descrição"},
-        {name: "date", label: "Data"},
-        {name: "type", label: "Tipo"},
-        {name: "value", label: "Valor", options:{...valueColumns}},
-        {name: "value", label: "Saldo", options:{...valueColumns}}
+        {name: "date", label: "Data", options:{...dateColumns}},
+        {name: "finalAmount", label: "Tipo", options:{...typeColumn}},
+        {name: "finalAmount", label: "Valor", options:{...valueColumns}},
+        {name: "balance", label: "Saldo", options:{...valueColumns}}
     ];
 
     const options = 
@@ -37,7 +46,7 @@ const StatementListTable = ({statements}) =>
         textLabels: TABLE_TEXT_LABEL,
         setRowProps: (row, dataIndex, rowIndex) => 
         { 
-            return row[2] === "Débito" && {style: {backgroundColor: "#ffe6e6", color: "#FF0000"}} 
+            return parseInt(row[3].replace(/R\$\s/g, "")) < 0 && {style: {backgroundColor: "#ffe6e6", color: "#FF0000"}} 
         },
     };
 
