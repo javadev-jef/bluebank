@@ -1,44 +1,93 @@
 import React, { useState, useEffect, useCallback } from "react";
+
 import Navbar from "../../components/Navbar";
-import "./style.scss";
-import transferImg from "../../assets/transfer_money.svg";
-import TransferForm from "../../components/TransferForm";
 import AlertMessage from "../../components/AlertMessage";
+import Form from "./Form";
+
+import transferImg from "../../assets/transfer_money.svg";
+
+import { API_ENDPOINT } from "../../constants/constants";
+
+import axios from "axios";
+import "./style.scss";
 
 export default function Transfer()
 {
-
-    const [alertProps, setAlertProps] = useState({open: false});
+    const [errors, setErrors] = useState([]);
     const [loading, setLoading] = useState(false);
     const [clearForm, setClearForm] = useState(false);
-    const [defaultValuesForm, setDefaultValuesForm] = useState({});
+    const [alertProps, setAlertProps] = useState({open: false});
+    const [serverComponents, setServerComponents] = useState([]);
 
     const onFormError = useCallback((errors) =>
     {
         if(Object.entries(errors).length > 0)
         {
             setAlertProps({type: "error", message: "Todos os campos em destaque são obrigatórios.", open: true});
-            console.log(errors);
         }
     }, []);
 
-    const onFormSuccess = (data) =>
+    const onFormSuccess = async (data) =>
     {
         console.log(data);
         setLoading(true);
 
-        setTimeout(() => 
+        try
         {
-            setLoading(false)
+	        await axios.post(`${API_ENDPOINT}/user/transfer`, data);
             setAlertProps({type: "success", message: "Transferência realizada com sucesso.", open: true});
             setClearForm(true);
-        }, 2000)
+        }
+        catch(error)
+        {
+            const response = error.response
+            const errors = response && response.data.errors;
+            const message = response && response.data.message;
+
+            if(response && errors && response.status === 400)
+            {
+                setErrors(errors);
+                setAlertProps({type: "error", message: "Ops! Os dados não foram preenchidos corretamente.", open: true});
+            }
+            else if(response && message)
+            {
+                setAlertProps({type: "error", message: message, open: true});
+            }
+            else{
+                setAlertProps({type: "error", message: "Falha na tentativa de conexão com servidor.", open: true});
+            }
+
+            console.log(error.response)
+        }
+        finally
+        {
+            setClearForm(false)
+            setLoading(false);
+        }
     }
 
-    useEffect(() => 
+    useEffect(()=>
     {
-        setDefaultValuesForm({balance: 1500})
+        /**
+         * A default server response for any pages
+         */
+        const getDefaultResponseServer = async () =>
+        {
+            try
+            {
+                const response = await axios.get(`${API_ENDPOINT}/default-response`);
+                setServerComponents(response.data);
+            }
+            catch(error)
+            {
+                if(!error.response)
+                {
+                    setAlertProps({type: "error", message: "Erro na tentativa de conexão com o servidor.", open: true});
+                }
+            }
+        };
 
+        getDefaultResponseServer();
     }, []);
 
     return(
@@ -58,12 +107,13 @@ export default function Transfer()
                     <img src={transferImg} alt="Transfer Money"/>
                 </section>
 
-                <TransferForm 
+                <Form 
+                    errorServer={errors}
                     onError={onFormError} 
                     onSuccess={onFormSuccess} 
                     loadingData={loading}
                     clearForm={clearForm}
-                    defaultValues={defaultValuesForm}
+                    serverComponents={serverComponents}
                 />
 
             </main>

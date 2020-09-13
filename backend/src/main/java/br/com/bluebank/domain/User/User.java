@@ -70,9 +70,17 @@ public class User implements Serializable
     @OneToMany(mappedBy = "user")
     private List<Account> accounts = new ArrayList<>();
 
+    @Getter
     public enum PersonType
     {
-        CNPJ,
-        CPF;
+        CNPJ("Pessoa Jurídica"),
+        CPF("Pessoa Física");
+
+        public String displayName;
+
+        PersonType(String displayName)
+        {
+            this.displayName = displayName;
+        }
     }
 }

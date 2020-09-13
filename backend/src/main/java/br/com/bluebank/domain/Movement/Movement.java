@@ -18,6 +18,7 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import br.com.bluebank.application.service.InsufficienteBalanceException;
 import br.com.bluebank.domain.Account.Account;
 import lombok.Getter;
 import lombok.Setter;
@@ -38,7 +39,7 @@ public class Movement implements Serializable
     @Size(min = 6, message = "O valor informado é muito curto para ser válido")
     private String description;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TIMESTAMP")
     @NotNull(message = "Nenhuma data foi informada")
     private LocalDateTime date;
 
@@ -63,11 +64,19 @@ public class Movement implements Serializable
 
     /**
      * Must be called by service and after setFinalAmount
+     * 
      * @param currentBalance current balance value.
      */
-    public void setBalance(BigDecimal currentBalance)
+    public void setBalance(BigDecimal currentBalance) throws InsufficienteBalanceException
     {
-        this.balance = currentBalance.add(finalAmount);
+        currentBalance = currentBalance.add(finalAmount);
+
+        if(currentBalance.compareTo(BigDecimal.ZERO) < 0)
+        {
+            throw new InsufficienteBalanceException();
+        }
+
+        this.balance = currentBalance;
     }
 
     /**

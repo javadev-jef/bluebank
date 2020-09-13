@@ -1,8 +1,9 @@
 package br.com.bluebank.domain.Account;
 
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.MonthDay;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -46,9 +47,9 @@ public class Account implements Serializable
 
     public void setNumAccount(String lastNumAccount)
     {
-        Calendar calendar = Calendar.getInstance();
-        String month = StringUtils.leftZeroes(calendar.get(Calendar.MONTH), 2);
-        String day = StringUtils.leftZeroes(calendar.get(Calendar.DAY_OF_MONTH), 2);
+        MonthDay md = MonthDay.from(LocalDate.now());
+        String month = StringUtils.leftZeroes(md.getMonthValue(), 2);
+        String day = StringUtils.leftZeroes(md.getDayOfMonth(), 2);
 
         if(lastNumAccount == null)
         {
@@ -68,7 +69,7 @@ public class Account implements Serializable
         return this.accountType.displayName;
     }
    
-   
+   @Getter
     public enum AccountType
     {
         SAVINGS_ACCOUNT("Conta Poupança"),

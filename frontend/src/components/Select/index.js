@@ -14,7 +14,7 @@ export default function Select({data, placeholder, required, min, max, minLength
                 validate: validate
             })}>
             {placeholder && <option value="" hidden>{placeholder}</option>}
-            {data.map(obj => <option key={obj[valueName]} value={obj[valueName]}>{obj[labelName]}</option>)}
+            {data && data.map(obj => <option key={obj[valueName]} value={obj[valueName]}>{obj[labelName]}</option>)}
         </select>
     );
 }

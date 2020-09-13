@@ -29,7 +29,7 @@ export default function Home()
                 </ContaCard>
                 <OptionCard title="Menu">
                     <Item label="Extrato" Icon={RiWallet3Line} to="/statement" />
-                    <Item label="Transferência" Icon={RiExchangeDollarLine} to="/transferencia" />
+                    <Item label="Transferência" Icon={RiExchangeDollarLine} to="/transfer" />
                     <Item label="Deposito" Icon={RiMoneyDollarCircleLine} to="/deposito" />
                     <Item label="Saque" Icon={RiHandCoinLine} to="/saque" />
                 </OptionCard>

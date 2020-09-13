@@ -71,16 +71,16 @@ export const statementForm = (initialDate, finalDate) =>  yupResolver(
 export const transferForm = (minDate) => yupResolver(
     yup.object().shape(
     {
-        originAccountType: yup.number().required().integer().isSelected().positive(),
+        numAccountUser: yup.string().required(),
         userName: yup.string().required().min(4),
-        numDestinationAccount: yup.string().required().length(4),
-        destinationAccountType: yup.number().required().integer().isSelected().positive(),
+        numAccount: yup.string().required().min(5),
+        accountType: yup.string().required(),
         favoredName: yup.string().required().min(4),
-        personType: yup.number().required().integer().isSelected().positive(),
-        destinationPersonType: yup.string().required().min(11).max(12),
-        transferValue: yup.number().typeError(FORM_ERROR_MESSAGES.strToNumberError).required().moreThan(0),
-        transferDescription: yup.string().optionalStr(4),
-        transferDate: yup.string().required().isDateValid().minDate(minDate),
+        personType: yup.string().required(),
+        cpfCnpj: yup.string().required().min(11).max(14),
+        amount: yup.number().typeError(FORM_ERROR_MESSAGES.strToNumberError).required().moreThan(9),
+        description: yup.string().nullable(true).default(null).optionalStr(4),
+        whenToDo: yup.date().required().isDateValid(DATE_FORMAT).minDate(minDate),
     })
 );
 
@@ -112,10 +112,18 @@ yup.addMethod(yup.date, "validateInitialDate", function(finalDate)
 
 yup.addMethod(yup.string, "optionalStr", function(minLength)
 {
-    return this.test("optionalStr", FORM_ERROR_MESSAGES.minLength, (value) => 
+    /*return this.test("optionalStr", FORM_ERROR_MESSAGES.minLength, (value) => 
     {
         return value.trim().length === 0 ? true : value.trim().length >= minLength;
-    })
+    })*/
+    return this.transform(function(value, originalValue)
+    {
+
+        return value.trim().length === 0 ? null : value;
+    }).test("optionalStr", FORM_ERROR_MESSAGES.minLength, (value) => 
+    {
+        return value === null ? true : value.trim().length >= minLength;
+    });
 });
 
 yup.addMethod(yup.string, "isDateValid", function()
@@ -134,6 +142,14 @@ yup.addMethod(yup.date, "isDateValid", function(format)
 
         return value.isValid() ? value.toDate() : null;
     });
+});
+
+yup.addMethod(yup.date, "minDate", function(minDate)
+{
+    return this.test("minDate", FORM_ERROR_MESSAGES.minDate, (value) => 
+    {
+        return moment(value, DATE_FORMAT, true).diff(minDate, "days") >= 0;
+    })
 });
 
 yup.addMethod(yup.string, "minDate", function(minDate)
