@@ -4,14 +4,20 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import br.com.bluebank.domain.Account.Account;
 import br.com.bluebank.domain.Account.AccountRepository;
@@ -46,7 +52,7 @@ public class MovementService
     }
 
     @Transactional
-    public void save(Movement mv) throws InsufficienteBalanceException
+    public byte[] save(Movement mv) throws InsufficienteBalanceException
     {
         String numAccount = mv.getAccount().getNumAccount();
 
@@ -58,6 +64,34 @@ public class MovementService
         mv.setDescription(mv.getDescription() == null ? getDefaultDescription(mv.getMovementType()) : mv.getDescription());
 
         movementRepository.save(mv);
+
+        if(mv.getMovementType() == MovementType.WITHDRAW)
+        {
+            Map<String, Object> dataMap = new HashMap<>();
+            dataMap.put("amount", mv.getTempAmount());
+            dataMap.put("accountType", mv.getAccount().getAccountType());
+
+            try
+            {
+                String jsonStr = new ObjectMapper().writeValueAsString(dataMap);
+                String jsonEncoded = Base64.getEncoder().encodeToString(jsonStr.getBytes());
+                
+                WebClient webClient = 
+                    WebClient.create("https://api.qrserver.com/v1/create-qr-code/?size=150x150&color=0087D0&bgcolor=fff&data="+jsonEncoded);
+                
+                return webClient.get()
+                    .accept(MediaType.IMAGE_PNG)
+                    .retrieve()
+                    .bodyToMono(byte[].class)
+                    .block();
+            }
+            catch(JsonProcessingException ex)
+            {
+                ex.printStackTrace();
+            }
+        }
+
+        return null;
     }
 
     @Transactional

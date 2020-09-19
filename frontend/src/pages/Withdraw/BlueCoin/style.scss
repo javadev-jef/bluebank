@@ -90,17 +90,3 @@ div.bluecoin-container
         }
     }
 }
-
-@media print
-{
-    div.bluecoin-container
-    {
-        border: 1px #D8D8D8 solid;
-        margin: 24px auto;
-
-        div.actions
-        {
-            display: none !important;
-        }
-    }
-}

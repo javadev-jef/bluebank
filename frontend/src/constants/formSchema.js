@@ -37,11 +37,10 @@ export const registerForm = () =>  yupResolver(
 export const withdrawForm = () =>  yupResolver(
     yup.object().shape(
     {
-        userAccountType: yup.number().required().integer().isSelected().positive(),
+        accountType: yup.string().required(),
         userName: yup.string().required().min(4),
-        withdrawType: yup.number().required().integer().isSelected().positive(),
-        withdrawValue: yup.number().typeError(FORM_ERROR_MESSAGES.strToNumberError).required().moreThan(0),
-        blueToken: yup.string().required().min(6),
+        type: yup.string().required(),
+        amount: yup.number().typeError(FORM_ERROR_MESSAGES.strToNumberError).required().moreThan(9),
     })
 );
 

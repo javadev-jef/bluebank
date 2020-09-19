@@ -91,6 +91,7 @@ public class Movement implements Serializable
 
     /**
      * MovementType and tempAmount must be set before.
+     * Must be called by service
      * @param value final amount value.
      */
     public void setFinalAmount(BigDecimal value)

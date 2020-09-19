@@ -20,10 +20,18 @@ import br.com.bluebank.application.service.InsufficienteBalanceException;
 import br.com.bluebank.application.service.MyselfTransferException;
 import br.com.bluebank.application.service.NoAccountFoundException;
 import br.com.bluebank.application.service.TransferException;
+import br.com.bluebank.application.service.WithdrawException;
 
 @RestControllerAdvice
 public class WebRequestExceptionHandler extends ResponseEntityExceptionHandler 
 {
+    @ExceptionHandler
+    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+    public RestResponseError handleException(WithdrawException ex) 
+    {
+        return RestResponseError.fromMessage(ex.getMessage());
+    }
+    
     @ExceptionHandler
     @ResponseStatus(code = HttpStatus.BAD_REQUEST)
     public RestResponseError handleException(InsufficienteBalanceException ex) 

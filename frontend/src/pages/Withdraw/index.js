@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React from "react";
 import Navbar from "../../components/Navbar";
 
 import "./style.scss";
@@ -9,33 +9,59 @@ import BlueCoin from "./BlueCoin";
 import { useState } from "react";
 import { useCallback } from "react";
 import AlertMessage from "../../components/AlertMessage";
-import { useReactToPrint } from "react-to-print";
+import axios from "axios";
+import { API_ENDPOINT } from "../../constants/constants";
 
 const Withdraw = () =>
 {
-    const blueCoinRef = useRef();
-    const [alertProps, setAlertProps] = useState({open: false});
-    const [openDialog, setOpenDialog] = useState(false);
     const [data, setData] = useState([]);
+    const [errors, setErrors] = useState([]);
+    const [qrCode, setQrCode] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [clearForm, setClearForm] = useState(false);
+    const [openDialog, setOpenDialog] = useState(false);
+    const [alertProps, setAlertProps] = useState({open: false});
+    const [serverComponents, setServerComponents] = useState([]);
 
-    const handlePrint = useReactToPrint({
-        content: () => blueCoinRef.current,
-        documentTitle: "BlueBank - Cédula de Saque",
-    });
-
-    const onSuccessForm = (data) =>
+    const onSuccessForm = async (data) =>
     {
         console.log(data);
-        setData(data);
-        setLoading(true)
-        setTimeout(()=>
+        try
         {
+            setLoading(true);
+            const response = await axios.post(`${API_ENDPOINT}/user/withdraw`, data, {responseType: 'arraybuffer'});
+            
+            setData(data);
+            setQrCode(new Buffer(response.data, "binary").toString("base64"));
+
             setAlertProps({type: "success", message: "Saque realizado com sucesso.", open: true});
+            setClearForm(true); setOpenDialog(true);
+        }
+        catch(error)
+        {
+            const response = error.response;
+            const data = response && JSON.parse(Buffer.from(response.data).toString('utf8'));
+            const errors = response && data.errors;
+            const message = response && data.message;
+
+            if(response && errors && response.status === 400)
+            {
+                setErrors(errors);
+                setAlertProps({type: "error", message: "Ops! Os dados não foram preenchidos corretamente.", open: true});
+            }
+            else if(response && message)
+            {
+                setAlertProps({type: "error", message: message, open: true});
+            }
+            else{
+                setAlertProps({type: "error", message: "Falha na tentativa de conexão com servidor.", open: true});
+            }
+        }
+        finally
+        {
             setLoading(false);
-            setOpenDialog(true);
-        }, 
-        2000);
+            setClearForm(false);
+        }
     }
 
     const onErrorForm = useCallback((errors)=>
@@ -46,6 +72,27 @@ const Withdraw = () =>
             console.log(errors);
         }
     },[]);
+
+    useState(() =>
+    {
+        const getDefaultStatusServer = async () =>
+        {
+            try
+            {
+                const response = await axios.get(`${API_ENDPOINT}/default-response`);
+                setServerComponents(response.data);
+            }
+            catch(error)
+            {
+                if(!error.response)
+                {
+                    setAlertProps({type: "error", message: "Erro na tentativa de conexão com o servidor.", open: true});
+                }
+            }
+        };
+
+        getDefaultStatusServer();
+    }, []);
 
     return(
         <div className="withdraw-container">
@@ -67,19 +114,20 @@ const Withdraw = () =>
                     onSuccess={onSuccessForm} 
                     onError={onErrorForm}
                     loadingData={loading}
+                    errorServer={errors}
+                    serverComponents={serverComponents}
+                    clearForm={clearForm}
                 />
 
                 <Dialog 
-                    open={openDialog} 
                     maxWidth={"lg"}
+                    open={openDialog && data.type === "BLUECOIN"} 
                     PaperProps={{style: {backgroundColor: "transparent"}}}
-                    >
-
+                >
                     <BlueCoin 
-                        ref={blueCoinRef} 
                         onClose={()=> setOpenDialog(false)}
-                        onPrint={handlePrint}
                         data={data}
+                        qrcode={qrCode}
                     />
                 </Dialog>
             </main>
