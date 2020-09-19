@@ -95,9 +95,9 @@ public class MovementService
     }
 
     @Transactional
-    public void transfer(Transfer transfer) throws TransferException, InsufficienteBalanceException
+    public void transfer(Transfer transfer, Account userAccount) throws TransferException, InsufficienteBalanceException
     {
-        Account fromAccount = accountRepository.findById(transfer.getNumAccountUser()).orElseThrow();
+        Account fromAccount = userAccount;
         Account toAccount = accountRepository.findById(transfer.getNumAccount()).orElseThrow(NoAccountFoundException::new);
 
         Map<String, String> errors = checkAndValidateTransferData(transfer, toAccount);

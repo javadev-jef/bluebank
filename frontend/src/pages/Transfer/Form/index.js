@@ -26,8 +26,8 @@ const Form = ({onError = () => {}, onSuccess = () => {}, loadingData = false, cl
     const watchAmount = watch("amount", 0);
     const [balance, setBalance] = useState(0);
     const [selectedTempDate, setSelectedTempDate] = useState(null);
-    const [selectedAccountNumber, setSelectedAccountNumber] = useState();
-    const {userAccountTypes, accountTypes, personTypes} = serverComponents;
+    const [selectedAccountType, setSelectedAccountType] = useState();
+    const {accountTypes, personTypes} = serverComponents;
 
     useEffect(() => 
     {
@@ -49,14 +49,15 @@ const Form = ({onError = () => {}, onSuccess = () => {}, loadingData = false, cl
     {
         try
         {
-            const response = await axios.get(`${API_ENDPOINT}/user/account/${selectedAccountNumber}/balance`);
+            const response = await axios.get(`${API_ENDPOINT}/user/account/${selectedAccountType}/balance`);
             setBalance(response.data.balance);
         }
         catch(error)
         {
             console.log(error);
         }
-    }, [selectedAccountNumber]);
+    }, 
+    [selectedAccountType]);
 
     useEffect(() => 
     {
@@ -71,9 +72,9 @@ const Form = ({onError = () => {}, onSuccess = () => {}, loadingData = false, cl
 
     useEffect(()=>
     {
-       getUserBalanceServer();   
+        selectedAccountType !== undefined && getUserBalanceServer();   
     },
-    [selectedAccountNumber, getUserBalanceServer]);
+    [selectedAccountType, getUserBalanceServer]);
 
     const getBalanceCalculated = () =>
     {
@@ -89,14 +90,14 @@ const Form = ({onError = () => {}, onSuccess = () => {}, loadingData = false, cl
                     <Grid item xs={4}>
                         <Select
                             placeholder="Conta"
-                            name="numAccountUser" 
-                            data={userAccountTypes} 
+                            name="userAccountType" 
+                            data={accountTypes} 
                             refForm={register}
-                            valueName="numAccount"
-                            labelName="accountTypeDisplayName"
-                            title={errors.numAccountUser?.message}
-                            onChange={e => setSelectedAccountNumber(e.target.value)}
-                            className={errors.numAccountUser && "input-error"}
+                            labelName="displayName"
+                            valueName="type"
+                            title={errors.userAccountType?.message}
+                            onChange={e => setSelectedAccountType(e.target.value)}
+                            className={errors.userAccountType && "input-error"}
                         />
                     </Grid>
 

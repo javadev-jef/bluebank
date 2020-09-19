@@ -22,9 +22,8 @@ import lombok.Setter;
 @SuppressWarnings("serial")
 public class Transfer implements Serializable
 {
-    @Size(min = 5, message = "A conta do usuário deve possui no minimo 5 digitos")
-    @NotBlank(message = "A conta do usuário de origem não pode ser vázia")
-    private String numAccountUser;
+    @NotNull(message = "O tipo da conta do usuário não foi informado")
+    private AccountType userAccountType;
 
     @Size(min = 5, message = "A conta do usuário de destino deve possui no minimo 5 digitos")
     @NotBlank(message = "A conta do usuário de destino não pode ser vázia")
@@ -51,11 +50,6 @@ public class Transfer implements Serializable
     @FutureOrPresent(message = "Não é permitido informadar datas do passado")
     @NotNull(message = "A data da transferência não foi informada")
     private LocalDate whenToDo;
-
-    public boolean isTransferToSameAccount()
-    {
-        return numAccountUser.equals(numAccount);
-    }
 
     public boolean hasDescription()
     {

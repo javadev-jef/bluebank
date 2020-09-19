@@ -70,7 +70,7 @@ export const statementForm = (initialDate, finalDate) =>  yupResolver(
 export const transferForm = (minDate) => yupResolver(
     yup.object().shape(
     {
-        numAccountUser: yup.string().required(),
+        userAccountType: yup.string().required(),
         userName: yup.string().required().min(4),
         numAccount: yup.string().required().min(5),
         accountType: yup.string().required(),

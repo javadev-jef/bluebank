@@ -96,12 +96,16 @@ public class AppServiceController
     public ResponseEntity<Transfer> transfer(@Valid @RequestBody Transfer transfer)
             throws TransferException, MyselfTransferException, InsufficienteBalanceException {
 
-        if(transfer.isTransferToSameAccount())
+        // TODO: Only test, must be the logged user
+        Integer userId = 1;
+        Account userAccount = accountRepository.findByUser_idAndAccountType(userId, transfer.getUserAccountType()).orElseThrow();
+
+        if(userAccount.getNumAccount().equals(transfer.getNumAccount()))
         {
             throw new MyselfTransferException();
         }
 
-        movementService.transfer(transfer);
+        movementService.transfer(transfer, userAccount);
         return ResponseEntity.ok(transfer);
     }
 
@@ -117,7 +121,7 @@ public class AppServiceController
 
         // TODO: Only test, must be the logged user
         Integer userId = 1;
-        Account userAccount = accountRepository.findByUser_idAndAccountType(userId, wform.getAccountType());
+        Account userAccount = accountRepository.findByUser_idAndAccountType(userId, wform.getAccountType()).orElseThrow();
 
         Movement mv = new Movement();
         mv.setAccount(userAccount);
