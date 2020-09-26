@@ -1,7 +1,7 @@
-package br.com.bluebank.application.service;
+package br.com.bluebank.application.service.exception;
 
 @SuppressWarnings("serial")
-public class MyselfTransferException extends Exception
+public class MyselfTransferException extends BlueBankException
 {
     public MyselfTransferException() 
     {

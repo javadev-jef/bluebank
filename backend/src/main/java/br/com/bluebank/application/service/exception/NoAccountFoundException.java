@@ -1,4 +1,4 @@
-package br.com.bluebank.application.service;
+package br.com.bluebank.application.service.exception;
 
 import java.util.NoSuchElementException;
 

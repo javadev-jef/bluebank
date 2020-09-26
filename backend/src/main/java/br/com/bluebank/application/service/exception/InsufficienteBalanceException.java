@@ -1,7 +1,7 @@
-package br.com.bluebank.application.service;
+package br.com.bluebank.application.service.exception;
 
 @SuppressWarnings("serial")
-public class InsufficienteBalanceException extends Exception
+public class InsufficienteBalanceException extends BlueBankException
 {
 
     public InsufficienteBalanceException() 
