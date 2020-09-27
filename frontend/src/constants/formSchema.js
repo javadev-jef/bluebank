@@ -39,7 +39,7 @@ export const withdrawForm = () =>  yupResolver(
     {
         accountType: yup.string().required(),
         userName: yup.string().required().min(4),
-        type: yup.string().required(),
+        cashType: yup.string().required(),
         amount: yup.number().typeError(FORM_ERROR_MESSAGES.strToNumberError).required().moreThan(9),
     })
 );
@@ -47,21 +47,25 @@ export const withdrawForm = () =>  yupResolver(
 export const depositForm = () =>  yupResolver(
     yup.object().shape(
     {
-        recipientAccount: yup.string().required().length(4),
-        recipientAccountType: yup.number().required().integer().isSelected().positive(),
-        recipientName: yup.string().required().min(4),
-        depositorName: yup.string().required().min(4),
-        depositorNumPersonType: yup.string().required().min(11).max(12),
-        depositorPhone: yup.string().required().min(14).max(16),
-        depositType: yup.number().required().integer().isSelected().positive(),
-        depositValue: yup.number().typeError(FORM_ERROR_MESSAGES.strToNumberError).required().moreThan(0)
+        numAccount: yup.string().required().min(5),
+        accountType: yup.string().required(),
+        userName: yup.string().required().min(4),
+        depositorName: yup.string().required().min(6),
+        cpfCnpj: yup.string().required().min(11).max(14),
+        phone: yup.string().required().min(10).max(11),
+        cashType: yup.string().required(),
+        amount: yup.number().when("cashType",
+        {
+            is: "CASH", 
+            then: yup.number().typeError(FORM_ERROR_MESSAGES.strToNumberError).required().moreThan(9)
+        })
     })
 );
 
 export const statementForm = (initialDate, finalDate) =>  yupResolver(
     yup.object().shape(
     {
-        numAccount: yup.string().required(),
+        accountType: yup.string().required(),
         initialDate: yup.date().required().isDateValid(DATE_FORMAT).validateInitialDate(finalDate),
         finalDate: yup.date().required().isDateValid(DATE_FORMAT).validateFinalDate(initialDate)
     })

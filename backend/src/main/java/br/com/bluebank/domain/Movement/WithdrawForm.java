@@ -9,6 +9,7 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import br.com.bluebank.domain.Account.Account.AccountType;
+import br.com.bluebank.utils.CashType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -24,26 +25,11 @@ public class WithdrawForm implements Serializable
     private BigDecimal amount;
 
     @NotNull(message = "A forma de saque não foi informada")
-    private WithdrawType type;
+    private CashType cashType;
 
     @JsonIgnore
     public boolean isAmountNotValidForType()
     {
-        double result = amount.doubleValue() - amount.intValue();
-        return this.type == WithdrawType.CASH && result != 0;
-    }
-
-    @Getter
-    public enum WithdrawType
-    {
-        CASH("Dinheiro"),
-        BLUECOIN("BlueCoin");
-
-        public String displayName;
-
-        WithdrawType(String displayName)
-        {
-            this.displayName = displayName;
-        }
+        return this.cashType == CashType.CASH && amount.doubleValue() % 2 != 0;
     }
 }

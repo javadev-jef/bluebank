@@ -1,22 +1,23 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState, useEffect } from "react";
+
 import {Grid, CircularProgress} from "@material-ui/core";
 import { useForm } from "react-hook-form";
-import Input from "../../../components/Input";
-import Select from "../../../components/Select";
-import { useState } from "react";
-import { formatCurrencyValue } from "../../../utils/functionUtils";
 import { Link } from "react-router-dom";
 import { withdrawForm } from "../../../constants/formSchema";
-import { useEffect } from "react";
-import axios from "axios";
+import Input from "../../../components/Input";
+import Select from "../../../components/Select";
+
+import { formatCurrencyValue } from "../../../utils/functionUtils";
 import { API_ENDPOINT } from "../../../constants/constants";
+
+import axios from "axios";
 
 const Form = ({loadingData = false, onSuccess = ()=>{}, onError = ()=>{}, errorServer, serverComponents, clearForm}) =>
 {
     const {register, errors, setError, handleSubmit, clearErrors, watch, reset} = useForm({resolver: withdrawForm()});
     const [balance, setBalance] = useState(0);
     const watchAmount = watch("amount", 0);
-    const {accountTypes, withdrawTypes} = serverComponents;
+    const {accountTypes, cashTypes} = serverComponents;
     const [selectedAccountType, setSelectedAccountType] = useState();
 
     useEffect(()=>
@@ -25,7 +26,7 @@ const Form = ({loadingData = false, onSuccess = ()=>{}, onError = ()=>{}, errorS
     }, 
     [errors, onError]);
 
-    // Set manual errors to react-hook-form
+    // SET MANUAL ERRORS TO REACT-HOOK-FORM
     useEffect(()=>
     {
         for(const error in errorServer)
@@ -54,10 +55,11 @@ const Form = ({loadingData = false, onSuccess = ()=>{}, onError = ()=>{}, errorS
         if(clearForm)
         {
             reset();
-            getBalanceServer();
+            setBalance(0);
+            setSelectedAccountType(undefined);
         }
     },
-    [clearForm, reset, getBalanceServer])
+    [clearForm, reset])
 
     useEffect(()=>
     {
@@ -102,14 +104,14 @@ const Form = ({loadingData = false, onSuccess = ()=>{}, onError = ()=>{}, errorS
 
                     <Grid item xs={5}>
                         <Select 
-                            data={withdrawTypes}
-                            name='type'
+                            data={cashTypes}
+                            name='cashType'
                             placeholder="Sacar em"
                             refForm={register}
                             valueName="type"
                             labelName="displayName"
-                            title={errors.type?.message}
-                            className={errors.type && "input-error"}
+                            title={errors.cashType?.message}
+                            className={errors.cashType && "input-error"}
                         />
                     </Grid>
 

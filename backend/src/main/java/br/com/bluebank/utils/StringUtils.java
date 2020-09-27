@@ -1,4 +1,4 @@
-package br.com.bluebank.application.utils;
+package br.com.bluebank.utils;
 
 public class StringUtils 
 {

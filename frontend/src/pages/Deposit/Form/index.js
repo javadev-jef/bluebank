@@ -1,32 +1,45 @@
-import React from "react";
+import React, { useEffect, useState }  from "react";
+
 import { useForm } from "react-hook-form";
 import { Grid, CircularProgress } from "@material-ui/core";
-import Input from "../../../components/Input";
-import Select from "../../../components/Select";
 import { depositForm } from "../../../constants/formSchema";
 import { Link } from "react-router-dom";
-import { useEffect } from "react";
+import {MdAttachFile} from "react-icons/md";
+import Input from "../../../components/Input";
+import Select from "../../../components/Select";
 
-const Form = ({onSuccess = () =>{}, onError = () =>{}, isUserLogged = false, loadingData = false}) =>
+const Form = ({onSuccess = () =>{}, onError = () =>{}, isUserLogged = false, loadingData = false, serverComponents, clearForm, errorServer}) =>
 {
-    const {register, clearErrors, errors, handleSubmit} = useForm({resolver: depositForm()});
-    
-    //TODO: Fetch accountTypes and depositTypes from the database
-    const accountTypes = [
-        {id: 1, description: "Corrente"},
-        {id: 2, description: "Poupança"}
-    ];
+    const {register, clearErrors,setError, errors, handleSubmit, reset} = useForm({resolver: depositForm()});
 
-    const depositTypes = [
-        {id: 1, description: "Dinheiro"},
-        {id: 2, description: "Cheque"}
-    ];
+    const {accountTypes, cashTypes} = serverComponents;
+
+    const [selectedCashType, setSelectedCashType] = useState("");
 
     useEffect(() => 
     {
         onError(errors);
     }, 
-    [errors, onError])
+    [errors, onError]);
+
+    useEffect(()=>
+    {
+        if(clearForm)
+        {
+            reset();
+        }
+    },
+    [clearForm, reset]);
+
+    // Set manual errors to react-hook-form
+    useEffect(()=>
+    {
+        for(const error in errorServer)
+        {
+            setError(error, {message: errorServer[error]});
+        }
+    }, 
+    [errorServer, setError]);
     
     return(
         <form onSubmit={handleSubmit(onSuccess)} autoComplete={"off"}>
@@ -36,32 +49,34 @@ const Form = ({onSuccess = () =>{}, onError = () =>{}, isUserLogged = false, loa
 
                     <Grid item xs={3}>
                         <Input 
-                            name="recipientAccount"
+                            name="numAccount"
                             placeholder="Conta"
                             refForm={register}
-                            title={errors.recipientAccount?.message}
-                            className={errors.recipientAccount && "input-error"}
+                            title={errors.numAccount?.message}
+                            className={errors.numAccount && "input-error"}
                         />
                     </Grid>
 
                     <Grid item xs={3}>
                         <Select 
                             data={accountTypes}
-                            name="recipientAccountType"
+                            name="accountType"
                             placeholder="Tipo"
                             refForm={register}
-                            title={errors.recipientAccountType?.message}
-                            className={errors.recipientAccountType && "input-error"}
+                            valueName="type"
+                            labelName="displayName"
+                            title={errors.accountType?.message}
+                            className={errors.accountType && "input-error"}
                         />   
                     </Grid>
 
                     <Grid item xs={6}>
                         <Input 
-                            name="recipientName"
+                            name="userName"
                             placeholder="Nome do Destinatário"
                             refForm={register}
-                            title={errors.recipientName?.message}
-                            className={errors.recipientName && "input-error"}
+                            title={errors.userName?.message}
+                            className={errors.userName && "input-error"}
                         />
                     </Grid>
 
@@ -83,43 +98,68 @@ const Form = ({onSuccess = () =>{}, onError = () =>{}, isUserLogged = false, loa
 
                     <Grid item xs={6}>
                         <Input 
-                            name="depositorNumPersonType"
+                            name="cpfCnpj"
                             placeholder="CPF/CNPJ"
                             refForm={register}
-                            title={errors.depositorNumPersonType?.message}
-                            className={errors.depositorNumPersonType && "input-error"}
+                            title={errors.cpfCnpj?.message}
+                            className={errors.cpfCnpj && "input-error"}
                         />
                     </Grid>
 
                     <Grid item xs={4}>
                         <Input 
-                            name="depositorPhone"
+                            name="phone"
                             placeholder="Telefone"
                             refForm={register}
-                            title={errors.depositorPhone?.message}
-                            className={errors.depositorPhone && "input-error"}
+                            title={errors.phone?.message}
+                            className={errors.phone && "input-error"}
                         />
                     </Grid>
 
                     <Grid item xs={4}>
                         <Select 
-                            data={depositTypes}
-                            name="depositType"
+                            data={cashTypes}
+                            name="cashType"
                             placeholder="Deposito em"
+                            valueName="type"
+                            labelName="displayName"
                             refForm={register}
-                            title={errors.depositType?.message}
-                            className={errors.depositType && "input-error"}
+                            title={errors.cashType?.message}
+                            className={errors.cashType && "input-error"}
+                            onChange={e => setSelectedCashType(e.target.value)}
                         />
                     </Grid>
 
                     <Grid item xs={4}>
-                        <Input 
-                            name="depositValue"
-                            placeholder="Valor Depósito"
-                            refForm={register}
-                            title={errors.depositValue?.message}
-                            className={errors.depositValue && "input-error"}
-                        />
+                        {
+                            selectedCashType === 'BLUECOIN'
+                            ?
+                                <>
+                                <label 
+                                    htmlFor="bluecoin-file"
+                                    title={errors.bluecoinFile?.message}
+                                    className={errors.bluecoinFile ? "input-error button-file" : 'button-file'}>
+                                    <MdAttachFile />
+                                    <span>Anexar</span>
+                                </label>
+                                <Input 
+                                    id="bluecoin-file" 
+                                    type="file" 
+                                    hidden
+                                    refForm={register}
+                                    name="bluecoinFile"
+                                    multiple={false}
+                                />
+                                </>
+                            :
+                                <Input 
+                                    name="amount"
+                                    placeholder="Valor Depósito"
+                                    refForm={register}
+                                    title={errors.amount?.message}
+                                    className={errors.amount && "input-error"}
+                                />   
+                        }
                     </Grid>
 
                 </Grid>

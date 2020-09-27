@@ -17,9 +17,9 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import br.com.bluebank.application.utils.StringUtils;
 import br.com.bluebank.domain.Movement.Movement;
 import br.com.bluebank.domain.User.User;
+import br.com.bluebank.utils.StringUtils;
 import lombok.Getter;
 import lombok.Setter;
 

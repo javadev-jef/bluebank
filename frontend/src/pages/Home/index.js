@@ -30,8 +30,8 @@ export default function Home()
                 <OptionCard title="Menu">
                     <Item label="Extrato" Icon={RiWallet3Line} to="/statement" />
                     <Item label="Transferência" Icon={RiExchangeDollarLine} to="/transfer" />
-                    <Item label="Deposito" Icon={RiMoneyDollarCircleLine} to="/deposito" />
-                    <Item label="Saque" Icon={RiHandCoinLine} to="/saque" />
+                    <Item label="Deposito" Icon={RiMoneyDollarCircleLine} to="/deposit" />
+                    <Item label="Saque" Icon={RiHandCoinLine} to="/withdraw" />
                 </OptionCard>
             </main>
         </div>

@@ -11,16 +11,16 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import br.com.bluebank.application.utils.StringUtils;
 import br.com.bluebank.domain.Account.Account.AccountType;
 import br.com.bluebank.domain.User.User.PersonType;
+import br.com.bluebank.utils.StringUtils;
 import lombok.Getter;
 import lombok.Setter;
 
 
 @Getter @Setter
 @SuppressWarnings("serial")
-public class Transfer implements Serializable
+public class TransferForm implements Serializable
 {
     @NotNull(message = "O tipo da conta do usuário não foi informado")
     private AccountType userAccountType;

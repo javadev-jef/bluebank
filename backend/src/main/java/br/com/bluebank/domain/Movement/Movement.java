@@ -18,7 +18,7 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import br.com.bluebank.application.service.InsufficienteBalanceException;
+import br.com.bluebank.application.service.exception.InsufficienteBalanceException;
 import br.com.bluebank.domain.Account.Account;
 import lombok.Getter;
 import lombok.Setter;
@@ -104,7 +104,7 @@ public class Movement implements Serializable
     {
         WITHDRAW("Saque", new BigDecimal(-1)),
         BONUS("Bonificação", new BigDecimal(1)),
-        DEPOSIT("Deposito", new BigDecimal(-1)),
+        DEPOSIT("Deposito", new BigDecimal(1)),
         TRANSFER_SOURCE("Origem da Transferência", new BigDecimal(-1)),
         TRANSFER_TARGER("Destino da Transferência", new BigDecimal(1));
 

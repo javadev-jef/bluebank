@@ -155,6 +155,34 @@ main
     }
 }
 
+.button-file
+{
+    width: 100%;
+    height: 60px;
+    color: #333;
+    min-width: 120px;
+    display: flex;
+    align-items: center;
+    border: $inputBorder;
+    padding: $inputPadding;
+    font-size: $fontSizeInput;
+    padding-right: 6px !important;
+    background: $inputBackgroundColor;
+    border-radius: $inputBorderRadius;
+    cursor: pointer;
+    transition: filter 500ms;
+
+    &:hover
+    {
+        filter: brightness(99%);
+    }
+
+    span
+    {
+        margin-left: 8px;
+    }
+}
+
 .button-cancel
 {
     @extend .button;

@@ -1,13 +1,19 @@
 import React, { useState, useEffect, useCallback } from "react";
-import Navbar from "../../components/Navbar";
 
-import "./style.scss";
-import StatementListTable from "../../components/StatementListTable";
 import { useStatements } from "../../hooks/useStatements";
+
+import Navbar from "../../components/Navbar";
+import StatementListTable from "../../components/StatementListTable";
 import { CircularProgress } from "@material-ui/core";
-import {formatCurrencyValue} from "../../utils/functionUtils";
 import AlertMessage from "../../components/AlertMessage";
 import Form from "./Form";
+
+import "./style.scss";
+
+import {formatCurrencyValue} from "../../utils/functionUtils";
+import { API_ENDPOINT } from "../../constants/constants";
+
+import axios from "axios";
 
 
 export default function Statement()
@@ -15,6 +21,7 @@ export default function Statement()
     const statements = useStatements();
     const [alertProps, setAlertProps] = useState({open: false});
     const [currentAccount, setCurrentAccount] = useState(0);
+    const [serverComponents, setServerComponents] = useState([]);
 
     const progressStyle = {
         marginLeft: 4,
@@ -24,7 +31,6 @@ export default function Statement()
     
     const onFormSuccess = (data) =>
     {
-        console.log(data);
         statements.fetch(data);
     }
 
@@ -42,13 +48,34 @@ export default function Statement()
         const response = statements.response;
         response.msg != null && setAlertProps({type: response.type, message: response.msg, open: true});
     }, 
-    [statements.response])
+    [statements.response]);
 
     useEffect(()=>
     {
         statements.clearStatement();
     }, // eslint-disable-next-line react-hooks/exhaustive-deps
     [currentAccount]);
+
+    useState(() =>
+    {
+        const getDefaultStatusServer = async () =>
+        {
+            try
+            {
+                const response = await axios.get(`${API_ENDPOINT}/default-response`);
+                setServerComponents(response.data);
+            }
+            catch(error)
+            {
+                if(!error.response)
+                {
+                    setAlertProps({type: "error", message: "Erro na tentativa de conexão com o servidor.", open: true});
+                }
+            }
+        };
+
+        getDefaultStatusServer();
+    }, []);
 
     return(
         <div className="statement-container">
@@ -91,6 +118,7 @@ export default function Statement()
                     onError={onErrorForm} 
                     loading={statements.loading}
                     onChangeAccount={setCurrentAccount}
+                    serverComponents={serverComponents}
                 />
 
                 <StatementListTable statements={statements}/>

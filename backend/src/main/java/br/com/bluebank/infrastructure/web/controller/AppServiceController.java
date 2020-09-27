@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -13,28 +14,29 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.com.bluebank.application.service.InsufficienteBalanceException;
+import br.com.bluebank.application.service.DepositService;
 import br.com.bluebank.application.service.MovementService;
-import br.com.bluebank.application.service.MyselfTransferException;
-import br.com.bluebank.application.service.TransferException;
-import br.com.bluebank.application.service.WithdrawException;
+import br.com.bluebank.application.service.TransferService;
+import br.com.bluebank.application.service.WithdrawService;
+import br.com.bluebank.application.service.exception.BlueBankException;
+import br.com.bluebank.application.service.exception.DepositException;
+import br.com.bluebank.application.service.exception.MyselfTransferException;
+import br.com.bluebank.application.service.exception.WithdrawException;
 import br.com.bluebank.domain.Account.Account;
 import br.com.bluebank.domain.Account.Account.AccountType;
 import br.com.bluebank.domain.Account.AccountRepository;
-import br.com.bluebank.domain.Movement.Movement;
-import br.com.bluebank.domain.Movement.Movement.MovementType;
+import br.com.bluebank.domain.Movement.DepositForm;
 import br.com.bluebank.domain.Movement.StatementFilter;
 import br.com.bluebank.domain.Movement.StatementResponse;
-import br.com.bluebank.domain.Movement.Transfer;
+import br.com.bluebank.domain.Movement.TransferForm;
 import br.com.bluebank.domain.Movement.WithdrawForm;
-import br.com.bluebank.domain.Movement.WithdrawForm.WithdrawType;
-import br.com.bluebank.domain.User.User.PersonType;
 import br.com.bluebank.infrastructure.web.DefaultResponse;
 
 @CrossOrigin
@@ -48,15 +50,17 @@ public class AppServiceController
     @Autowired
     private AccountRepository accountRepository;
 
-    @GetMapping(path = "/user/accounts")
-    public ResponseEntity<List<Account>> getUserAccountTypes() 
-    {
-        Integer userId = 1;
-        return ResponseEntity.ok(accountRepository.findByUser_Id(userId));
-    }
+    @Autowired
+    private TransferService transferService;
+
+    @Autowired
+    private DepositService depositService;
+
+    @Autowired
+    private WithdrawService withdrawService;
 
     @GetMapping(path = "/user/account/{accountType}/balance")
-    public ResponseEntity<Map<String, BigDecimal>> getUserBalance(@PathVariable("accountType") AccountType accountType)
+    public ResponseEntity<Map<String, BigDecimal>> getUserBalance(@PathVariable("accountType") AccountType accountType) 
     {
         // TODO: Only test, must be the logged user
         Integer userId = 1;
@@ -75,61 +79,73 @@ public class AppServiceController
     {
         // TODO: Only test, must be the logged user
         Integer userId = 1;
-
-        AccountType[] accountTypes = Account.AccountType.values();
-        PersonType[] personTypes = PersonType.values();
-        WithdrawType[] withdrawTypes = WithdrawType.values();
-
         List<Account> userAccounts = accountRepository.findByUser_Id(userId);
 
-        return ResponseEntity.ok(DefaultResponse.fromData(userAccounts, accountTypes, personTypes, withdrawTypes));
+        return ResponseEntity.ok(DefaultResponse.fromData(userAccounts));
     }
 
     @PostMapping(path = "/statement")
-    public ResponseEntity<StatementResponse> getStatement(@Valid @RequestBody StatementFilter stf)
+    public ResponseEntity<StatementResponse> getStatement(@Valid @RequestBody StatementFilter stf) 
     {
         StatementResponse str = movementService.getStatementData(stf);
         return ResponseEntity.ok(str);
     }
 
     @PostMapping(path = "user/transfer")
-    public ResponseEntity<Transfer> transfer(@Valid @RequestBody Transfer transfer)
-            throws TransferException, MyselfTransferException, InsufficienteBalanceException {
-
+    public ResponseEntity<TransferForm> transfer(@Valid @RequestBody TransferForm transfer) throws BlueBankException
+    {
         // TODO: Only test, must be the logged user
         Integer userId = 1;
         Account userAccount = accountRepository.findByUser_idAndAccountType(userId, transfer.getUserAccountType()).orElseThrow();
 
-        if(userAccount.getNumAccount().equals(transfer.getNumAccount()))
+        if(userAccount.getNumAccount().equals(transfer.getNumAccount())) 
         {
             throw new MyselfTransferException();
         }
 
-        movementService.transfer(transfer, userAccount);
+        transferService.save(transfer, userAccount);
         return ResponseEntity.ok(transfer);
     }
 
     @PostMapping(path = "/user/withdraw", produces = MediaType.IMAGE_PNG_VALUE)
-    public ResponseEntity<byte[]> withdraw(@Valid @RequestBody WithdrawForm wform)
-            throws InsufficienteBalanceException, WithdrawException {
+    public ResponseEntity<byte[]> withdraw(@Valid @RequestBody WithdrawForm wform) throws BlueBankException 
+    {
 
-        if(wform.isAmountNotValidForType())
+        if(wform.isAmountNotValidForType()) 
         {
-            String msg = "Para o tipo dinheiro, somente é possível realizar o saque em valores inteiros";
-            throw new WithdrawException(msg);
+            String msg = "Infelizmente não é possivel sacar moedas, somente notas.";
+
+            Map<String, String> error = new LinkedHashMap<>();
+            error.put("amount", msg);
+
+            throw new WithdrawException(error, msg);
         }
 
         // TODO: Only test, must be the logged user
         Integer userId = 1;
-        Account userAccount = accountRepository.findByUser_idAndAccountType(userId, wform.getAccountType()).orElseThrow();
+        Optional<byte[]> response = withdrawService.save(wform, userId);
 
-        Movement mv = new Movement();
-        mv.setAccount(userAccount);
-        mv.setDate(LocalDateTime.now());
-        mv.setMovementType(MovementType.WITHDRAW);
-        mv.setTempAmount(wform.getAmount());
-        byte[] response = movementService.save(mv);
+        return response.isPresent() ? ResponseEntity.ok(response.get()) : ResponseEntity.ok().build();
+    }
 
-        return ResponseEntity.ok(response);
+    @PostMapping(path = "/user/account/deposit")
+    public ResponseEntity<DepositForm> deposit(@Valid @ModelAttribute DepositForm dForm) throws BlueBankException
+    {  
+        if(dForm.isAmountNotValidForType()) 
+        {
+            String msg = "Não é permitido o depósito de moedas, somente notas";
+
+            Map<String, String> error = new LinkedHashMap<>();
+            error.put("amount", msg);
+
+            throw new DepositException(error, msg);
+        }
+
+        depositService.save(dForm);
+
+        dForm.setDateTime(LocalDateTime.now());
+        dForm.setBluecoinFile(null);
+
+        return ResponseEntity.ok(dForm);
     }
 }

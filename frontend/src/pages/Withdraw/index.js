@@ -1,16 +1,19 @@
-import React from "react";
+import React, { useCallback, useState } from "react";
+
 import Navbar from "../../components/Navbar";
 
 import "./style.scss";
+
 import Form from "./Form";
-import saqueImg from "../../assets/withdraw_money.svg";
 import { Dialog } from "@material-ui/core";
 import BlueCoin from "./BlueCoin";
-import { useState } from "react";
-import { useCallback } from "react";
 import AlertMessage from "../../components/AlertMessage";
-import axios from "axios";
+
+import saqueImg from "../../assets/withdraw_money.svg";
 import { API_ENDPOINT } from "../../constants/constants";
+
+import axios from "axios";
+
 
 const Withdraw = () =>
 {
@@ -121,7 +124,7 @@ const Withdraw = () =>
 
                 <Dialog 
                     maxWidth={"lg"}
-                    open={openDialog && data.type === "BLUECOIN"} 
+                    open={openDialog && data.cashType === "BLUECOIN"} 
                     PaperProps={{style: {backgroundColor: "transparent"}}}
                 >
                     <BlueCoin 

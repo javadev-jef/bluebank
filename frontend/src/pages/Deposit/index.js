@@ -1,15 +1,20 @@
 import React, { useEffect, useRef } from "react";
-import Navbar from "../../components/Navbar";
+import { useState, useCallback } from "react";
 
-import "./style.scss";
-import depositImg from "../../assets/deposit_money.svg";
-import { useState } from "react";
-import Form from "./Form";
+import Navbar from "../../components/Navbar";
 import AlertMessage from "../../components/AlertMessage";
-import { useCallback } from "react";
 import { Dialog } from "@material-ui/core";
 import Receipt from "./Receipt";
+import Form from "./Form";
+
+import "./style.scss";
+
+import depositImg from "../../assets/deposit_money.svg";
+
 import { useReactToPrint } from 'react-to-print';
+import { API_ENDPOINT } from "../../constants/constants";
+import axios from "axios";
+import {serialize} from "object-to-formdata";
 
 const Deposit = () =>
 {
@@ -19,24 +24,58 @@ const Deposit = () =>
     const [openDialog, setOpenDialog] = useState(false);
     const [data, setData] = useState([]);
     const reciboRef = useRef();
+    const [serverComponents, setServerComponents] = useState([]);
+    const [clearForm, setClearForm] = useState(false);
+    const [errors, setErrors] = useState([]);
 
-    const handlePrint = useReactToPrint({
+    const handlePrint = useReactToPrint
+    ({
         content: () => reciboRef.current,
         documentTitle: "BlueBank - Recibo",
     });
 
-    const onFormSuccess = (data) =>
+    const onFormSuccess = async (data) =>
     {
-        console.log(data);
-        setData(data);
-        setLoading(true)
-        setTimeout(()=>
+        const finalFile = data.cashType === "BLUECOIN" ? data.bluecoinFile[0] : undefined;
+        const formData = serialize({...data, bluecoinFile: finalFile});
+
+        try
         {
+            setLoading(true);
+            const response = await axios.post(`${API_ENDPOINT}/user/account/deposit`, formData, {
+                headers: {"Content-Type": "multipart/form-data"}
+            });
+            
+            setData(response.data);
+
             setAlertProps({type: "success", message: "Deposito realizado com sucesso.", open: true});
+            setClearForm(true); setOpenDialog(true);
+        }
+        catch(error)
+        {
+            const response = error.response;
+            const data = response && response.data;
+            const errors = response && data.errors;
+            const message = response && data.message;
+
+            if(response && errors && response.status === 400)
+            {
+                setErrors(errors);
+                setAlertProps({type: "error", message: "Ops! Os dados não foram preenchidos corretamente.", open: true});
+            }
+            else if(response && message)
+            {
+                setAlertProps({type: "error", message: message, open: true});
+            }
+            else{
+                setAlertProps({type: "error", message: "Falha na tentativa de conexão com servidor.", open: true});
+            }
+        }
+        finally
+        {
             setLoading(false);
-            setOpenDialog(true);
-        }, 
-        2000);
+            setClearForm(false);
+        }
     }
 
     const onFormError = useCallback((errors) =>
@@ -46,6 +85,27 @@ const Deposit = () =>
             setAlertProps({type: "error", message: "Todos os campos em destaque são obrigatórios.", open: true});
             console.log(errors);
         }
+    }, []);
+
+    useState(() =>
+    {
+        const getDefaultStatusServer = async () =>
+        {
+            try
+            {
+                const response = await axios.get(`${API_ENDPOINT}/default-response`);
+                setServerComponents(response.data);
+            }
+            catch(error)
+            {
+                if(!error.response)
+                {
+                    setAlertProps({type: "error", message: "Erro na tentativa de conexão com o servidor.", open: true});
+                }
+            }
+        };
+
+        getDefaultStatusServer();
     }, []);
 
     useEffect(()=>
@@ -85,6 +145,9 @@ const Deposit = () =>
                     isUserLogged={logged}
                     onError={onFormError}
                     onSuccess={onFormSuccess}
+                    errorServer={errors}
+                    serverComponents={serverComponents}
+                    clearForm={clearForm}
                 />
 
                 <Dialog 
@@ -97,6 +160,7 @@ const Deposit = () =>
                         ref={reciboRef}
                         onPrint={handlePrint}
                         data={data}
+                        serverComponents={serverComponents}
                     />
                 </Dialog>
                 
