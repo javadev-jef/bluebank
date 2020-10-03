@@ -1,52 +1,92 @@
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 import "./style.scss";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { FiArrowLeft } from "react-icons/fi";
-import { useState } from "react";
-import { useEffect } from "react";
-import { useEstados } from "../../hooks/useEstados";
-import { useCidades } from "../../hooks/useCidades";
+import Form from "./Form";
+import { API_ENDPOINT } from "../../constants/constants";
+import axios from "axios";
+import AlertMessage from "../../components/AlertMessage";
 
 export default function Register()
 {
-    const [nome, setNome] = useState("");
-    const [cpf, setCpf] = useState("");
-    const [nascimento, setNascimento] = useState("");
-    const [email, setEmail] = useState("");
-    const [estado, setEstado] = useState("");
-    const [cidade, setCidade] = useState("");
-    const [senha, setSenha] = useState("");
-    const [repetirSenha, setRepetirSenha] = useState("");
+    const [alertProps, setAlertProps] = useState({open: false});
+    const [loading, setLoading] = useState(false);
+    const [serverComponents, setServerComponents] = useState([]);
+    const [errors, setErrors] = useState([]);
+    const [clearForm, setClearForm] = useState(false);
+    const history = useHistory();
 
-    const estadosIbge = useEstados();
-    const cidadesIbge = useCidades();
-
-    const handleSubmit = (event) =>
+    const onErrorForm = useCallback((errors) =>
     {
-        event.preventDefault();
-        const data = {nome, cpf, nascimento, email, estado, cidade, senha, repetirSenha};
+        if(Object.entries(errors).length > 0)
+        {
+            setAlertProps({type: "error", message: "Todos os campos em destaque são obrigatórios.", open: true});
+            console.log(errors);
+        }
+    }, []);
+
+    const onSuccessForm = async (data) =>
+    {
         console.log(data);
+        try
+        {
+            setLoading(true);
+            await axios.post(`${API_ENDPOINT}/user/register`, data);
+            setClearForm(true);
+            setAlertProps({type: "success", message: "Cadastro realizado com sucesso!", open: true});
+            setTimeout(() => history.push("/"), 4000);
+        }
+        catch(error)
+        {
+            const response = error.response;
+            const data = response && response.data;
+            const errors = response && data.errors;
+            const message = response && data.message;
+
+            if(response && errors && response.status === 400)
+            {
+                setErrors(errors);
+                setAlertProps({type: "error", message: "Ops! Os dados não foram preenchidos corretamente.", open: true});
+            }
+            else if(response && message)
+            {
+                setAlertProps({type: "error", message: message, open: true});
+            }
+            else{
+                setAlertProps({type: "error", message: "Falha na tentativa de conexão com servidor.", open: true});
+            }
+            console.log(error);
+        }
+        finally
+        {
+            setLoading(false);
+        }
     }
 
-    useEffect(() => 
+    useEffect(()=>
     {
-        estadosIbge.list();
-        
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+        /**
+         * GET A DEFAULT RESPONSE FOR ANY PAGES
+         */
+        const getDefaultResponseServer = async () =>
+        {
+            try
+            {
+                const response = await axios.get(`${API_ENDPOINT}/default-response`);
+                setServerComponents(response.data);
+            }
+            catch(error)
+            {
+                if(!error.response)
+                {
+                    setAlertProps({type: "error", message: "Erro na tentativa de conexão com o servidor.", open: true});
+                }
+            }
+        };
 
-    useEffect(() => 
-    { 
-        // Removes the current cidade when change the estado
-        setCidade("");
-
-        // Reports the loading of cidades as a option
-        cidadesIbge.setCidades([{id: 0, nome: "Carregando..."}]);
-        cidadesIbge.list(estado);
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [estado]);
+        getDefaultResponseServer();
+    }, []);
 
     return(
         <div className="register-container">
@@ -62,64 +102,25 @@ export default function Register()
                     <Link className="link-to" to="/"><FiArrowLeft />Já possuo uma conta</Link>
                 </section>
 
-                <form onSubmit={handleSubmit} autoComplete="off">
-                    <input 
-                        placeholder="Nome Completo"
-                        value={nome}
-                        onChange={e => setNome(e.target.value)}
-                    />
-                    <div className="input-group">
-                        <input 
-                            placeholder="CPF"
-                            value={cpf}
-                            onChange={e => setCpf(e.target.value)}
-                        />
-                        <input 
-                            placeholder="Nascimento"
-                            value={nascimento}
-                            onChange={e => setNascimento(e.target.value)}
-                        />
-                    </div>
-                    <input 
-                        placeholder="E-mail"
-                        value={email}
-                        onChange={e => setEmail(e.target.value)}
-                    />
-                    <div className="input-group">
-                        <select 
-                            style={{width: 120}}
-                            value={estado}
-                            onChange={e => setEstado(e.target.value)}
-                        >
-                            <option value="" defaultValue hidden>Estado</option>
-                            {estadosIbge.estados.map(estado => (<option key={estado.id} value={estado.id}>{estado.sigla}</option>))}
-                        </select>
-                        <select 
-                            value={cidade}
-                            onChange={e => setCidade(e.target.value)}
-                            disabled={cidadesIbge.cidades.length === 0}
-                        >
-                            <option value="" defaultValue hidden>Cidade</option>
-                            {cidadesIbge.cidades.map(cidade => (<option key={cidade.id} value={cidade.id}>{cidade.nome}</option>))}
-                        </select>
-                    </div>
-                    <div className="input-group">
-                        <input 
-                            type="password"
-                            placeholder="Senha"
-                            value={senha}
-                            onChange={e => setSenha(e.target.value)}
-                        />
-                        <input 
-                            type="password"
-                            placeholder="Repetir senha"
-                            value={repetirSenha}
-                            onChange={e => setRepetirSenha(e.target.value)}
-                        />
-                    </div>
-                    <input className="button" type="submit" value="Abrir minha conta"/>
-                </form>
+                <Form 
+                    loadingData={loading}
+                    onSuccess={onSuccessForm}
+                    onError={onErrorForm}
+                    errorServer={errors}
+                    serverComponents={serverComponents}
+                    clearForm={clearForm}
+                />
             </div>
+
+            <AlertMessage 
+                maxWidth={450} 
+                open={alertProps.open}
+                autoHideDuration={8000} 
+                severity={alertProps.type}
+                message={alertProps.message}
+                anchorOrigin={{vertical: "bottom", horizontal: "left"}}
+                onClose={() => setAlertProps({...alertProps, open: false})}
+            />
         </div>
     );
 }

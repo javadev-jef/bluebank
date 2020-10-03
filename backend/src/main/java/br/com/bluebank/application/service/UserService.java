@@ -1,9 +1,14 @@
 package br.com.bluebank.application.service;
 
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import br.com.bluebank.application.service.exception.ValidationException;
 import br.com.bluebank.domain.Account.Account;
 import br.com.bluebank.domain.Account.Account.AccountType;
 import br.com.bluebank.domain.Account.AccountRepository;
@@ -21,8 +26,15 @@ public class UserService
     private AccountRepository accountRepository;
 
     @Transactional
-    public User save(User user)
+    public User save(User user) throws ValidationException
     {
+        Map<String, String> errors = checkAndValidateUserAttributes(user);
+
+        if(errors.size() > 0)
+        {
+            throw new ValidationException(errors);
+        }
+        
         user = userRepository.save(user);
 
         Account account;
@@ -39,6 +51,35 @@ public class UserService
         }
 
        return user;
+    }
+
+    private Map<String, String> checkAndValidateUserAttributes(User user)
+    {
+        Map<String, String> errors = new LinkedHashMap<>();
+        List<User> usersBD = userRepository.findByEmailOrCpfCnpj(user.getEmail(), user.getCpfCnpj());
+
+        if(user.isNotEmptyPassword())
+        {
+            errors.put("password", "Nenhuma senha foi informada");
+        }
+
+        if(usersBD != null && !usersBD.isEmpty())
+        {
+            for(User userBD : usersBD)
+            {
+                if(userBD.getCpfCnpj().equals(user.getCpfCnpj()))
+                {
+                    errors.put("cpfCnpj", "O CPF/CNPJ informado já pertence a um usuário do sistema");
+                }
+
+                if(userBD.getEmail().equals(user.getEmail()))
+                {
+                    errors.put("email", "O email informado já esta vinculado a um cadastro do sistema");
+                }
+            }
+        }
+
+        return errors;
     }
 
     @Transactional

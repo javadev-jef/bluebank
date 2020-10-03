@@ -20,7 +20,7 @@ yup.setLocale({
     }
 });
 
-export const registerForm = () =>  yupResolver(
+export const registerForm = (passwordRequired = false) =>  yupResolver(
     yup.object().shape(
     {
         name: yup.string().required().min(4),
@@ -34,7 +34,7 @@ export const registerForm = () =>  yupResolver(
         email: yup.string().required().email(),
         stateId: yup.number().required().integer().isSelected().positive(),
         cityId: yup.number().required().integer().isSelected().positive(),
-        password: yup.string().optionalStr(6),
+        password: passwordRequired ? yup.string().required().min(6) : yup.string().optionalStr(6),
         passwordConfirm: yup.string().when("password", {
             is: val => val != null,
             then: yup.string().oneOf([yup.ref("password"), null], FORM_ERROR_MESSAGES.passwordConfirm)

@@ -10,6 +10,7 @@ import java.util.Optional;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.bluebank.application.service.DepositService;
@@ -30,6 +32,7 @@ import br.com.bluebank.application.service.WithdrawService;
 import br.com.bluebank.application.service.exception.BlueBankException;
 import br.com.bluebank.application.service.exception.DepositException;
 import br.com.bluebank.application.service.exception.MyselfTransferException;
+import br.com.bluebank.application.service.exception.ValidationException;
 import br.com.bluebank.application.service.exception.WithdrawException;
 import br.com.bluebank.domain.Account.Account;
 import br.com.bluebank.domain.Account.Account.AccountType;
@@ -172,5 +175,12 @@ public class AppServiceController
         Integer userId = 1;
         user.setId(userId);
         user = userService.update(user);
+    }
+
+    @PostMapping(path = "/user/register")
+    @ResponseStatus(value = HttpStatus.CREATED)
+    public void registerUser(@Valid @RequestBody User user) throws ValidationException
+    {
+        userService.save(user);
     }
 }

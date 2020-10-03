@@ -23,6 +23,7 @@ import javax.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import br.com.bluebank.domain.Account.Account;
+import br.com.bluebank.utils.StringUtils;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -87,5 +88,11 @@ public class User implements Serializable
         {
             this.displayName = displayName;
         }
+    }
+
+    @JsonIgnore
+    public boolean isNotEmptyPassword()
+    {
+        return StringUtils.isEmpty(this.password);
     }
 }
