@@ -1,15 +1,24 @@
-import React, { useState } from "react";
-import "./style.scss";
+import React, { useEffect, useState, useCallback } from "react";
+
 import { Link } from "react-router-dom";
+
 import { FiArrowLeft } from "react-icons/fi";
+
 import Form from "./Form";
 import AlertMessage from "../../components/AlertMessage";
-import { useCallback } from "react";
+
+import { API_ENDPOINT } from "../../constants/constants";
+
+import "./style.scss";
+
+import axios from "axios";
 
 const Profile = () =>
 {
     const [alertProps, setAlertProps] = useState({open: false});
     const [loading, setLoading] = useState(false);
+    const [serverComponents, setServerComponents] = useState([]);
+    const [errors, setErrors] = useState([]);
     
     const onErrorForm = useCallback((errors) =>
     {
@@ -20,16 +29,65 @@ const Profile = () =>
         }
     }, []);
 
-    const onSuccessForm = (data) =>
+    const onSuccessForm = async (data) =>
     {
-        setLoading(true)
-        setTimeout(() =>
+        try
         {
-            console.log(data);
+            setLoading(true);
+            await axios.put(`${API_ENDPOINT}/user/profile/update`, data);
+            
+            setAlertProps({type: "success", message: "Dados alterados com sucesso!", open: true});
+        }
+        catch(error)
+        {
+            const response = error.response;
+            const data = response && response.data;
+            const errors = response && data.errors;
+            const message = response && data.message;
+
+            if(response && errors && response.status === 400)
+            {
+                setErrors(errors);
+                setAlertProps({type: "error", message: "Ops! Os dados não foram preenchidos corretamente.", open: true});
+            }
+            else if(response && message)
+            {
+                setAlertProps({type: "error", message: message, open: true});
+            }
+            else{
+                setAlertProps({type: "error", message: "Falha na tentativa de conexão com servidor.", open: true});
+            }
+            console.log(error);
+        }
+        finally
+        {
             setLoading(false);
-            setAlertProps({type: "success", message: "Cadastro atualizado com sucesso.", open: true});
-        }, 2000)
+        }
     }
+
+    useEffect(()=>
+    {
+        /**
+         * GET A DEFAULT RESPONSE FOR ANY PAGES
+         */
+        const getDefaultResponseServer = async () =>
+        {
+            try
+            {
+                const response = await axios.get(`${API_ENDPOINT}/default-response`);
+                setServerComponents(response.data);
+            }
+            catch(error)
+            {
+                if(!error.response)
+                {
+                    setAlertProps({type: "error", message: "Erro na tentativa de conexão com o servidor.", open: true});
+                }
+            }
+        };
+
+        getDefaultResponseServer();
+    }, []);
 
     return(
         <div className="profile-container">
@@ -52,6 +110,8 @@ const Profile = () =>
                     loadingData={loading}
                     onError={onErrorForm} 
                     onSuccess={onSuccessForm}
+                    serverComponents={serverComponents}
+                    errorServer={errors}
                 />
             </main>
 

@@ -15,9 +15,12 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import br.com.bluebank.domain.Account.Account;
 import lombok.Getter;
@@ -25,8 +28,8 @@ import lombok.Setter;
 
 @Entity
 @Getter @Setter
-@SuppressWarnings("serial")
 @Table(name = "TBL_USER")
+@SuppressWarnings("serial")
 public class User implements Serializable
 {
     @Id
@@ -44,14 +47,15 @@ public class User implements Serializable
 
     @Column(nullable = false, unique = true, length = 14)
     @Size(min = 11, max = 14, message = "O valor do campo não está correto")
-    @Pattern(regexp = "[0-9]{11,14}", message = "O campo informado possui os dados inválidos")
+    @Pattern(regexp = "[0-9]{11}|[0-9]{14}", message = "O CPF/CNPJ informado não está correto")
     private String cpfCnpj;
 
     @Column(nullable = false)
     @NotNull(message = "O campo não pode ser vázio")
-    private LocalDate bithday;
+    private LocalDate birthDate;
 
     @Email(message = "O email informado é inválido")
+    @NotBlank(message = "Nenhum email foi informado")
     @Column(nullable = false, unique = true, length = 64)
     private String email;
 
@@ -67,6 +71,7 @@ public class User implements Serializable
     @Size(min = 6, message = "A senha informada é muito pequena")
     private String password;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "user")
     private List<Account> accounts = new ArrayList<>();
 

@@ -15,7 +15,7 @@ div.profile-container
     main
     {
         width: 100%;
-        padding: 40px;
+        padding: 28px;
         background: $backgroundColor;
         box-shadow: 0 0 100px rgba(0, 0, 0, 0.1);
         border-radius: 8px;
@@ -28,8 +28,9 @@ div.profile-container
 
         form
         {
-            max-width: 500px;
-            min-width: 500px;
+            max-width: 524px;
+            min-width: 524px;
+            padding: 12px;
         }
 
         section
@@ -52,6 +53,53 @@ div.profile-container
             img
             {
                 width: 320px;
+            }
+        }
+    }
+}
+
+// Media Queries
+@media screen and (max-width: 1020px)
+{
+    div.profile-container > main
+    {
+        p, ol{
+           font-size: 16px !important;
+        }
+    }
+}
+
+@media screen and (max-width: 975px)
+{
+    div.profile-container
+    {
+        height: auto;
+        
+        main
+        {
+            width: auto !important;
+            flex-direction: column;
+            align-items: initial !important;
+
+            section
+            {
+                max-width: 450px !important;
+                margin-right: 0 !important;
+                padding: 0 12px;
+
+                p, ol{
+                    display: none;
+                }
+
+                h1:not(.logo)
+                {
+                    margin-bottom: 0 !important;
+                }
+
+                h2
+                {
+                    margin-bottom: auto !important;
+                }
             }
         }
     }

@@ -12,42 +12,24 @@ import {FaRegCalendarAlt} from "react-icons/fa";
 //SCSS
 import "./style.scss";
 
-export default function DatePicker(props)
+export default function DatePicker({refForm, disabled, onChange = () => {}, className, ...props})
 {
-    const {onChange = (e) => {}, value, placeholder, disablePast, name, className, refForm, maxDate} = props;
-    const {required, min, max, minLength, maxLength, pattern, validate, title, disableFuture} = props;
-
     return(
         <MuiPickersUtilsProvider utils={MomentUtils}>
             <KeyboardDatePicker
-                name={name}
+                {...props}
                 clearable
-                title={title}
-                maxDate={maxDate}
                 clearLabel={"Limpar"}
                 cancelLabel={"Cancelar"}
-                className={`mui-datepicker-custom ${className}`}
-                placeholder={placeholder}
+                className={`mui-datepicker-custom ${className} ${disabled && 'mdc-disabled'}`}
                 invalidDateMessage={null}
                 helperText={null}
-                disablePast={disablePast}
-                disableFuture={disableFuture}
                 inputVariant={"standard"}
-                value={value}
                 onChange={onChange}
                 format={DATE_FORMAT}
                 keyboardIcon={<FaRegCalendarAlt />}
                 InputProps={{disableUnderline: true}}
-                inputRef={refForm(
-                    {
-                        required: required, 
-                        min: min,
-                        max: max,
-                        minLength: minLength, 
-                        maxLength: maxLength,
-                        pattern: pattern,
-                        validate: validate
-                    })}
+                inputRef={refForm}
             />
         </MuiPickersUtilsProvider>
     );

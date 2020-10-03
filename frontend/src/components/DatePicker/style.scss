@@ -8,6 +8,12 @@
     padding: 0 !important;
     background-color: #E6E6E6 !important;
 
+    &.mdc-disabled
+    {
+        opacity: 0.3;
+        background-color: #FFF !important;
+    }
+
     .MuiInput-root
     {
         height: 100%;
@@ -23,6 +29,11 @@
             border: none !important;
             border-radius: 8px 0px 0px 8px;
             border-right: $inputBorder;
+
+            &:disabled
+            {
+                background: rgba(216, 216, 216, 0) !important;
+            }
         }
 
         .MuiInputAdornment-positionEnd

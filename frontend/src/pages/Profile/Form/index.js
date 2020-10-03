@@ -1,49 +1,101 @@
 import React, { useEffect, useState } from "react";
-import { Grid, CircularProgress } from "@material-ui/core";
-import { useForm } from "react-hook-form";
+
+import { Grid, CircularProgress, Backdrop } from "@material-ui/core";
 import Input from "../../../components/Input";
 import DatePicker from "../../../components/DatePicker";
 import Select from "../../../components/Select";
-import { useEstados } from "../../../hooks/useEstados";
-import { useCidades } from "../../../hooks/useCidades";
+
+import { useForm } from "react-hook-form";
+import { useStates } from "../../../hooks/useStates";
+import { useCities } from "../../../hooks/useCities";
 import { registerForm } from "../../../constants/formSchema";
+
 import { getAgeOfMajority } from "../../../utils/functionUtils";
+import { API_ENDPOINT, DATE_FORMAT } from "../../../constants/constants";
 
-const Form = ({onError = ()=>{}, onSuccess = ()=>{}, loadingData}) =>
+import axios from "axios";
+import moment from "moment";
+
+const Form = ({onError = ()=>{}, onSuccess = ()=>{}, loadingData, serverComponents, errorServer}) =>
 {
-    const cidadesIbge = useCidades();
-    const estadosIbge = useEstados();
-    const [bithDateTemp, setBirthDateTemp] = useState(null);
-    
-    const {register, watch, getValues, handleSubmit, errors, clearErrors, reset} = useForm({resolver: registerForm()});
+    const {cities, cityList} = useCities();
+    const {states} = useStates();
+    const {personTypes} = serverComponents;
 
+    const [birthDateTemp, setBirthDateTemp] = useState(null);
+    const [userData, setUserData] = useState({}); 
+    const [errorProfile, setErrorProfile] = useState(false);
+    const [initialized, setInitialized] = useState(false);
 
-    //Executes when loading states
+    const {register, watch, handleSubmit, setError, errors, clearErrors, reset} = useForm({resolver: registerForm()});
+
+    const onChangeState = (stateId) =>
+    {
+        cityList(stateId);
+    }
+
+    // SET MANUAL ERRORS TO REACT-HOOK-FORM
     useEffect(()=>
     {
-        // Loads initial data
-        reset({
-            state: 31,
-            email: "myemail@myemail.com"
-        })
+        for(const error in errorServer)
+        {
+            setError(error, {message: errorServer[error]});
+        }
     }, 
-    [estadosIbge.estados])
+    [errorServer, setError]);
 
-    useEffect(() => 
+    //EXECUTES WHEN USER-DATA IS LOADED
+    useEffect(()=>
     {
-        estadosIbge.list();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
-
-    useEffect(() => 
-    { 
-        // Reports the loading of cidades as a option
-        cidadesIbge.setCidades([{id: 0, nome: "Carregando..."}]);
-        cidadesIbge.list(getValues("state"));
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        // LOADS INITIAL FORM DATA
+        if(userData.id !== undefined)
+        {
+            reset({...userData, cityId: undefined, birthDate: null});
+            cityList(userData.stateId);
+        }
     }, 
-    [watch("state")]);
+    [userData, cityList, reset]);
+
+    useEffect(() =>
+    {
+        // UPDATES INITIAL FORM DATA WITH CITY
+        if(cities.length > 0 && cities[0].id !== 0 && !initialized)
+        {
+            const birthDate = moment(userData.birthDate, true, DATE_FORMAT);
+            reset({...userData, birthDate: birthDate});
+            setBirthDateTemp(birthDate);
+            setInitialized(true);
+        }
+    },
+    [cities, userData, initialized, reset]);
+
+    useEffect(()=>
+    {
+        const source = axios.CancelToken.source();
+
+        const getProfileData = async () =>
+        {
+            try
+            {
+                const response = await axios.get(`${API_ENDPOINT}/user/profile`, {cancelToken: source.token});
+                const data = response.data;
+
+                setUserData({...data, hasData: true});
+            }
+            catch(error)
+            {
+                if(!axios.isCancel(error))
+                {
+                    setErrorProfile(true);
+                    console.log(error);
+                }
+            }
+        };
+        states.length > 0 && getProfileData();
+        
+        return () => source.cancel();
+    },
+    [states]);
 
     useEffect(() => 
     {
@@ -51,39 +103,75 @@ const Form = ({onError = ()=>{}, onSuccess = ()=>{}, loadingData}) =>
     }, 
     [errors, onError])
     
+    const backdropStyle = {
+        zIndex: 101, 
+        position: "absolute", 
+        flexDirection: "column",
+        background: "transparent", 
+        borderRadius: "8px",
+        padding: "12px",
+    }
+
     return(
         <form autoComplete="off" onSubmit={handleSubmit(onSuccess)}>
+            <Backdrop open={!errorProfile && !userData.hasData} style={backdropStyle}>
+                <CircularProgress />
+                <span>Carregando...</span>
+            </Backdrop>
+
             <Grid container spacing={1}>
-                <Grid item xs={12}>
+
+                <Grid item xs={8}>
                     <Input 
                         placeholder="Nome Completo"
                         name="name"  
                         refForm={register} 
                         title={errors.name?.message}
                         className={errors.name && "input-error"}
+                        disabled={!userData.hasData}
                     />
                 </Grid>
+
+                <Grid item xs={4}>
+                    <Select
+                        placeholder="Tipo"
+                        valueName="type"
+                        labelName="displayName"
+                        name="personType"
+                        data={personTypes}
+                        refForm={register}
+                        title={errors.personType?.message}
+                        className={errors.personType && "input-error"}
+                        disabled={!userData.hasData}
+                    />
+                </Grid>
+
                 <Grid item xs={6}>
                     <Input 
-                        placeholder="CPF" 
-                        name="numPersonType"   
+                        placeholder={watch("personType") ? watch("personType") : "CPF/CNPJ"}
+                        name="cpfCnpj"   
                         refForm={register} 
-                        title={errors.numPersonType?.message}
-                        className={errors.numPersonType && "input-error"}
+                        title={errors.cpfCnpj?.message}
+                        className={errors.cpfCnpj && "input-error"}
+                        disabled={!userData.hasData}
                     />
                 </Grid>
+
                 <Grid item xs={6}>
                     <DatePicker 
                         placeholder="Nascimento"  
-                        name="birthDate" 
+                        name="birthDate"
                         refForm={register} 
                         maxDate={getAgeOfMajority(new Date())}
-                        value={bithDateTemp}
+                        value={birthDateTemp}
                         onChange={setBirthDateTemp}
                         title={errors.birthDate?.message}
                         className={errors.birthDate && "input-error"}
+                        disabled={!userData.hasData}
+                        
                     />
                 </Grid>
+
                 <Grid item xs={12}>
                     <Input 
                         placeholder="E-mail"   
@@ -91,33 +179,39 @@ const Form = ({onError = ()=>{}, onSuccess = ()=>{}, loadingData}) =>
                         refForm={register}  
                         title={errors.email?.message}
                         className={errors.email && "input-error"}
+                        disabled={!userData.hasData}
                     />
                 </Grid>
+
                 <Grid item xs={4}>
                     <Select
                         placeholder="Estado"
-                        valueOptName="id"
-                        descOptName="sigla"
-                        name="state"
-                        data={estadosIbge.estados}
+                        valueName="id"
+                        labelName="sigla"
+                        name="stateId"
+                        onChange={e => onChangeState(e.target.value)}
+                        data={states}
                         refForm={register}
-                        title={errors.state?.message}
-                        className={errors.state && "input-error"}
+                        title={errors.stateId?.message}
+                        className={errors.stateId && "input-error"}
+                        disabled={!userData.hasData}
                     />
                 </Grid>
+
                 <Grid item xs={8}>
                     <Select
                         placeholder="Cidade"
-                        valueOptName="id"
-                        descOptName="nome"
-                        name="city"
-                        data={cidadesIbge.cidades}
+                        valueName="id"
+                        labelName="nome"
+                        name="cityId"
+                        data={cities}
                         refForm={register}
-                        title={errors.city?.message}
-                        className={errors.city && "input-error"}
-                        disabled={cidadesIbge.cidades.length === 0}
+                        title={errors.cityId?.message}
+                        className={errors.cityId && "input-error"}
+                        disabled={!userData.hasData}
                     />
                 </Grid>
+
                 <Grid item xs={6}>
                     <Input 
                         type="password"
@@ -126,8 +220,10 @@ const Form = ({onError = ()=>{}, onSuccess = ()=>{}, loadingData}) =>
                         refForm={register}  
                         title={errors.password?.message}
                         className={errors.password && "input-error"}
+                        disabled={!userData.hasData}
                     />
                 </Grid>
+
                 <Grid item xs={6}>
                     <Input 
                         type="password"
@@ -136,14 +232,16 @@ const Form = ({onError = ()=>{}, onSuccess = ()=>{}, loadingData}) =>
                         refForm={register} 
                         title={errors.passwordConfirm?.message}
                         className={errors.passwordConfirm && "input-error"}
+                        disabled={!userData.hasData}
                     />
                 </Grid>
+                
             </Grid>
             <button 
                 type="submit"
                 className="button" 
                 onClick={() => clearErrors()} 
-                disabled={loadingData} 
+                disabled={loadingData || !userData.hasData} 
             >
                 {loadingData ? <CircularProgress style={{color: "#FFF"}}/> : "Realizar Alterações"}
             </button>

@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import br.com.bluebank.application.service.DepositService;
 import br.com.bluebank.application.service.MovementService;
 import br.com.bluebank.application.service.TransferService;
+import br.com.bluebank.application.service.UserService;
 import br.com.bluebank.application.service.WithdrawService;
 import br.com.bluebank.application.service.exception.BlueBankException;
 import br.com.bluebank.application.service.exception.DepositException;
@@ -37,6 +39,7 @@ import br.com.bluebank.domain.Movement.StatementFilter;
 import br.com.bluebank.domain.Movement.StatementResponse;
 import br.com.bluebank.domain.Movement.TransferForm;
 import br.com.bluebank.domain.Movement.WithdrawForm;
+import br.com.bluebank.domain.User.User;
 import br.com.bluebank.infrastructure.web.DefaultResponse;
 
 @CrossOrigin
@@ -49,6 +52,9 @@ public class AppServiceController
 
     @Autowired
     private AccountRepository accountRepository;
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private TransferService transferService;
@@ -147,5 +153,24 @@ public class AppServiceController
         dForm.setBluecoinFile(null);
 
         return ResponseEntity.ok(dForm);
+    }
+
+    @GetMapping(path = "/user/profile")
+    public ResponseEntity<User> profile()
+    {
+        // TODO: Only test, must be the logged user
+        Integer userId = 1;
+        User user = userService.findById(userId);
+
+        return ResponseEntity.ok(user);
+    }
+
+    @PutMapping(path = "/user/profile/update")
+    public void updateProfile(@Valid @RequestBody User user)
+    {
+        // TODO: Only test, must be the logged user
+        Integer userId = 1;
+        user.setId(userId);
+        user = userService.update(user);
     }
 }

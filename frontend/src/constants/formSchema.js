@@ -24,13 +24,21 @@ export const registerForm = () =>  yupResolver(
     yup.object().shape(
     {
         name: yup.string().required().min(4),
-        numPersonType: yup.string().required().min(11).max(12),
-        birthDate: yup.string().required().isDateValid().isAgeOfMajority(),
+        personType: yup.string().required(),
+        cpfCnpj: yup.string().when("personType",{
+            is: val => val === "CPF",
+            then: yup.string().required().length(11),
+            otherwise: yup.string().required().length(14)
+        }),
+        birthDate: yup.date().required().isDateValid(DATE_FORMAT).isAgeOfMajority(),
         email: yup.string().required().email(),
-        state: yup.number().required().integer().isSelected().positive(),
-        city: yup.number().required().integer().isSelected().positive(),
-        password: yup.string().required().min(6),
-        passwordConfirm: yup.string().oneOf([yup.ref("password"), null], FORM_ERROR_MESSAGES.passwordConfirm)
+        stateId: yup.number().required().integer().isSelected().positive(),
+        cityId: yup.number().required().integer().isSelected().positive(),
+        password: yup.string().optionalStr(6),
+        passwordConfirm: yup.string().when("password", {
+            is: val => val != null,
+            then: yup.string().oneOf([yup.ref("password"), null], FORM_ERROR_MESSAGES.passwordConfirm)
+        })
     })
 );
 
@@ -87,7 +95,7 @@ export const transferForm = (minDate) => yupResolver(
     })
 );
 
-yup.addMethod(yup.string, "isAgeOfMajority", function()
+yup.addMethod(yup.date, "isAgeOfMajority", function()
 {
     return this.test("isAgeOfMajority", FORM_ERROR_MESSAGES.ageOfMajority, (value) => 
     {
@@ -115,17 +123,13 @@ yup.addMethod(yup.date, "validateInitialDate", function(finalDate)
 
 yup.addMethod(yup.string, "optionalStr", function(minLength)
 {
-    /*return this.test("optionalStr", FORM_ERROR_MESSAGES.minLength, (value) => 
-    {
-        return value.trim().length === 0 ? true : value.trim().length >= minLength;
-    })*/
     return this.transform(function(value, originalValue)
     {
-
-        return value.trim().length === 0 ? null : value;
-    }).test("optionalStr", FORM_ERROR_MESSAGES.minLength, (value) => 
+        return value.trim().length === 0 ? undefined : value;
+    })
+    .test("optionalStr", FORM_ERROR_MESSAGES.minLength, (value) => 
     {
-        return value === null ? true : value.trim().length >= minLength;
+        return value === undefined ? true : value.trim().length >= minLength;
     });
 });
 
