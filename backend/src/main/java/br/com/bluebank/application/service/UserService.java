@@ -67,14 +67,17 @@ public class UserService
         {
             for(User userBD : usersBD)
             {
-                if(userBD.getCpfCnpj().equals(user.getCpfCnpj()))
+                if(!userBD.equals(user))
                 {
-                    errors.put("cpfCnpj", "O CPF/CNPJ informado já pertence a um usuário do sistema");
-                }
+                    if(userBD.getCpfCnpj().equals(user.getCpfCnpj()))
+                    {
+                        errors.put("cpfCnpj", "O CPF/CNPJ informado já pertence a um usuário do sistema");
+                    }
 
-                if(userBD.getEmail().equals(user.getEmail()))
-                {
-                    errors.put("email", "O email informado já esta vinculado a um cadastro do sistema");
+                    if(userBD.getEmail().equals(user.getEmail()))
+                    {
+                        errors.put("email", "O email informado já esta vinculado a um cadastro do sistema");
+                    }
                 }
             }
         }
@@ -83,12 +86,18 @@ public class UserService
     }
 
     @Transactional
-    public User update(User user)
+    public User update(User user) throws ValidationException
     {
         if(StringUtils.isEmpty(user.getPassword()))
         {
             String userPassword = userRepository.findUserPasswordById(user.getId());
             user.setPassword(userPassword);
+        }
+
+        Map<String, String> errors = checkAndValidateUserAttributes(user);
+        if(errors.size() > 0)
+        {
+            throw new ValidationException(errors);
         }
         
         return userRepository.save(user);

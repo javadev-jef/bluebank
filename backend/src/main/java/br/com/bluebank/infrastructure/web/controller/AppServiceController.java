@@ -169,7 +169,7 @@ public class AppServiceController
     }
 
     @PutMapping(path = "/user/profile/update")
-    public void updateProfile(@Valid @RequestBody User user)
+    public void updateProfile(@Valid @RequestBody User user) throws ValidationException
     {
         // TODO: Only test, must be the logged user
         Integer userId = 1;

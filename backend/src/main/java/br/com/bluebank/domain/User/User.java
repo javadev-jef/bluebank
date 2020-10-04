@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import br.com.bluebank.domain.Account.Account;
 import br.com.bluebank.utils.StringUtils;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -31,9 +32,11 @@ import lombok.Setter;
 @Getter @Setter
 @Table(name = "TBL_USER")
 @SuppressWarnings("serial")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class User implements Serializable
 {
     @Id
+    @EqualsAndHashCode.Include
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false, unique = true)
     private Integer id;
