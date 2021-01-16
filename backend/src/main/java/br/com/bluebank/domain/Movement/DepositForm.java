@@ -10,11 +10,8 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import org.springframework.web.multipart.MultipartFile;
 
-import br.com.bluebank.application.service.exception.DepositException;
 import br.com.bluebank.domain.Account.Account.AccountType;
 import br.com.bluebank.infrastructure.web.validator.UploadConstraint;
 import br.com.bluebank.utils.CashType;
@@ -40,8 +37,7 @@ public class DepositForm implements Serializable
     @NotNull(message = "O nome do depositante não foi informado")
     private String depositorName;    
 
-    @Size(min = 11, max = 14, message = "O valor do campo não está correto")
-    @Pattern(regexp = "[0-9]{11}|[0-9]{14}", message = "O campo informado possui dados inválidos")
+    @Pattern(regexp = "[0-9]{11}|[0-9]{14}", message = "CPF/CNPJ informado é inválido")
     @NotBlank(message = "Não foi informado nenhum CPF/CNPJ")
     private String cpfCnpj;
 
@@ -60,17 +56,6 @@ public class DepositForm implements Serializable
     private BigDecimal amount;
 
     private LocalDateTime dateTime;
-
-    @JsonIgnore
-    public boolean isAmountNotValidForType() throws DepositException
-    {
-        if(this.amount == null && this.cashType == CashType.CASH)
-        {
-            throw new DepositException("Nenhum valor de depósito foi informado.");
-        }
-
-        return this.cashType == CashType.CASH && amount.doubleValue() % 2 != 0;
-    }
 
     public boolean bluecoinFileIsEmpty()
     {

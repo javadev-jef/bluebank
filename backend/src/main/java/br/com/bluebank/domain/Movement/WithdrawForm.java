@@ -6,8 +6,6 @@ import java.math.BigDecimal;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import br.com.bluebank.domain.Account.Account.AccountType;
 import br.com.bluebank.utils.CashType;
 import lombok.Getter;
@@ -26,10 +24,4 @@ public class WithdrawForm implements Serializable
 
     @NotNull(message = "A forma de saque não foi informada")
     private CashType cashType;
-
-    @JsonIgnore
-    public boolean isAmountNotValidForType()
-    {
-        return this.cashType == CashType.CASH && amount.doubleValue() % 2 != 0;
-    }
 }

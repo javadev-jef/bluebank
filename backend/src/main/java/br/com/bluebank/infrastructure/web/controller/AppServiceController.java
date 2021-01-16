@@ -32,6 +32,7 @@ import br.com.bluebank.application.service.WithdrawService;
 import br.com.bluebank.application.service.exception.BlueBankException;
 import br.com.bluebank.application.service.exception.DepositException;
 import br.com.bluebank.application.service.exception.MyselfTransferException;
+import br.com.bluebank.application.service.exception.TransactionException;
 import br.com.bluebank.application.service.exception.ValidationException;
 import br.com.bluebank.application.service.exception.WithdrawException;
 import br.com.bluebank.domain.Account.Account;
@@ -44,6 +45,7 @@ import br.com.bluebank.domain.Movement.TransferForm;
 import br.com.bluebank.domain.Movement.WithdrawForm;
 import br.com.bluebank.domain.User.User;
 import br.com.bluebank.infrastructure.web.DefaultResponse;
+import br.com.bluebank.utils.TransactionUtils;
 
 @CrossOrigin
 @RestController
@@ -117,22 +119,20 @@ public class AppServiceController
     }
 
     @PostMapping(path = "/user/withdraw", produces = MediaType.IMAGE_PNG_VALUE)
-    public ResponseEntity<byte[]> withdraw(@Valid @RequestBody WithdrawForm wform) throws BlueBankException 
+    public ResponseEntity<byte[]> withdraw(@Valid @RequestBody WithdrawForm wForm) throws BlueBankException
     {
-
-        if(wform.isAmountNotValidForType()) 
+        try 
         {
-            String msg = "Infelizmente não é possivel sacar moedas, somente notas.";
-
-            Map<String, String> error = new LinkedHashMap<>();
-            error.put("amount", msg);
-
-            throw new WithdrawException(error, msg);
-        }
+			TransactionUtils.validateAmountByCashType(wForm.getAmount(), wForm.getCashType());
+        } 
+        catch (TransactionException e) 
+        {
+			throw new WithdrawException(e.getErrors(), e.getMessage());
+		}
 
         // TODO: Only test, must be the logged user
         Integer userId = 1;
-        Optional<byte[]> response = withdrawService.save(wform, userId);
+        Optional<byte[]> response = withdrawService.save(wForm, userId);
 
         return response.isPresent() ? ResponseEntity.ok(response.get()) : ResponseEntity.ok().build();
     }
@@ -140,15 +140,14 @@ public class AppServiceController
     @PostMapping(path = "/user/account/deposit")
     public ResponseEntity<DepositForm> deposit(@Valid @ModelAttribute DepositForm dForm) throws BlueBankException
     {  
-        if(dForm.isAmountNotValidForType()) 
+        try 
         {
-            String msg = "Não é permitido o depósito de moedas, somente notas";
-
-            Map<String, String> error = new LinkedHashMap<>();
-            error.put("amount", msg);
-
-            throw new DepositException(error, msg);
-        }
+			TransactionUtils.validateAmountByCashType(dForm.getAmount(), dForm.getCashType());
+        } 
+        catch (TransactionException e) 
+        {
+			throw new DepositException(e.getErrors(), e.getMessage());
+		}
 
         depositService.save(dForm);
 

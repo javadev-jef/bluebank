@@ -35,8 +35,7 @@ public class TransferForm implements Serializable
     @NotNull(message = "O tipo de pessoa não foi informado")
     private PersonType personType;
 
-    @Size(min = 11, max = 14, message = "O valor do campo não está correto")
-    @Pattern(regexp = "[0-9]{11}|[0-9]{14}", message = "O campo informado possui dados inválidos")
+    @Pattern(regexp = "[0-9]{11}|[0-9]{14}", message = "CPF/CNPJ informado é inválido")
     @NotBlank(message = "Não foi informado nenhum CPF/CNPJ")
     private String cpfCnpj;
 

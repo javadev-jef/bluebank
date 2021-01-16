@@ -8,6 +8,9 @@ yup.setLocale({
     mixed:{
         required: "Campo obrigatório",
     },
+    date:{
+        required: "Campo obrigatório"
+    },
     number:{
         min: 'Deve ser maior que ${min}',
         moreThan: "O valor informado deve ser maior que ${more}"
@@ -79,7 +82,7 @@ export const statementForm = (initialDate, finalDate) =>  yupResolver(
     })
 );
 
-export const transferForm = (minDate) => yupResolver(
+export const transferForm = () => yupResolver(
     yup.object().shape(
     {
         userAccountType: yup.string().required(),
@@ -90,8 +93,8 @@ export const transferForm = (minDate) => yupResolver(
         personType: yup.string().required(),
         cpfCnpj: yup.string().required().min(11).max(14),
         amount: yup.number().typeError(FORM_ERROR_MESSAGES.strToNumberError).required().moreThan(9),
-        description: yup.string().nullable(true).default(null).optionalStr(4),
-        whenToDo: yup.date().required().isDateValid(DATE_FORMAT).minDate(minDate),
+        description: yup.string().nullable(true).optionalStr(4),
+        whenToDo: yup.date().required().nullable().default(null).isDateValid(DATE_FORMAT).minDate(),
     })
 );
 
@@ -151,19 +154,19 @@ yup.addMethod(yup.date, "isDateValid", function(format)
     });
 });
 
-yup.addMethod(yup.date, "minDate", function(minDate)
+yup.addMethod(yup.date, "minDate", function()
 {
     return this.test("minDate", FORM_ERROR_MESSAGES.minDate, (value) => 
     {
-        return moment(value, DATE_FORMAT, true).diff(minDate, "days") >= 0;
+        return moment(value, DATE_FORMAT, true).diff(moment(new Date(), DATE_FORMAT, true), "days") >= 0;
     })
 });
 
-yup.addMethod(yup.string, "minDate", function(minDate)
+yup.addMethod(yup.string, "minDate", function()
 {
     return this.test("minDate", FORM_ERROR_MESSAGES.minDate, (value) => 
     {
-        return moment(value, DATE_FORMAT, true).diff(minDate, "days") >= 0;
+        return moment(value, DATE_FORMAT, true).diff(new Date(), "days") >= 0;
     })
 });
 

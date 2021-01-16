@@ -50,8 +50,7 @@ public class User implements Serializable
     private PersonType personType;
 
     @Column(nullable = false, unique = true, length = 14)
-    @Size(min = 11, max = 14, message = "O valor do campo não está correto")
-    @Pattern(regexp = "[0-9]{11}|[0-9]{14}", message = "O CPF/CNPJ informado não está correto")
+    @Pattern(regexp = "[0-9]{11}|[0-9]{14}", message = "CPF/CNPJ informado é inválido")
     private String cpfCnpj;
 
     @Column(nullable = false)
