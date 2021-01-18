@@ -37,7 +37,7 @@ const Receipt = React.forwardRef(({onClose = ()=>{}, onPrint = ()=>{}, data, ser
 
                 <div className="field-labels">
                     <span className="label">Chave de Identificação</span>
-                    <span className="value">987654321</span>
+                    <span className="value">-</span>
                 </div>
             </div>
             <div className="side-right">

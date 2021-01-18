@@ -53,15 +53,14 @@ public class Account implements Serializable
 
         if(lastNumAccount == null)
         {
-            //Ex: '08' + '01' + '0' = '08010'
-            lastNumAccount = month + day + StringUtils.leftZeroes(0, 1);
+            //Ex: '01' + '21' + '0' = '01210'
+            lastNumAccount = month + day + "0";
         }
 
-        //Ex: seq = 0
-        int seq = Integer.parseInt(lastNumAccount.substring(4));
-        seq++;
+        int tempLastNumAccount = Integer.parseInt(lastNumAccount);
+        int seq = Integer.parseInt(StringUtils.leftZeroes(tempLastNumAccount, 5).substring(4));
 
-        this.numAccount = month + day + seq;
+        this.numAccount = month + day + ++seq;
     }
 
     public String getAccountTypeDisplayName()

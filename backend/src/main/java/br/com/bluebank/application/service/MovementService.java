@@ -40,6 +40,12 @@ public class MovementService
 
     public Movement save(Movement mv) throws InsufficienteBalanceException
     {
+        if(mv.getNumTransaction() == null)
+        {
+            Long lastNumTransaction = movementRepository.findLastNumTransaction();
+            mv.setNumTransaction(lastNumTransaction);
+        }
+        
         mv = MovementServiceUtils.prepareToSave(mv, movementRepository);
         mv = movementRepository.save(mv);
 

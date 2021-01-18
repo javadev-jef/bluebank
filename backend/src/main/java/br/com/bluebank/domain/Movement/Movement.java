@@ -35,7 +35,7 @@ public class Movement implements Serializable
     private Integer id;
 
     @Column(length = 60, nullable = false)
-    @Size(max = 60, message = "O valor inserido ultrapassa 60 carecteres")
+    @Size(max = 80, message = "O valor inserido ultrapassa 80 carecteres")
     @Size(min = 6, message = "O valor informado é muito curto para ser válido")
     private String description;
 
@@ -61,6 +61,10 @@ public class Movement implements Serializable
     private Account account;
 
     private Boolean scheduled = false;
+
+    @Column(nullable = false)
+    @NotNull(message = "O número da transação não pode ser null")
+    private Long numTransaction;
 
     /**
      * Must be called by service and after setFinalAmount
@@ -99,6 +103,16 @@ public class Movement implements Serializable
         this.finalAmount = value.multiply(movementType.factor);
     }
 
+    public void setNumTransaction(Long lastNumTransaction)
+    {
+        if(lastNumTransaction == null)
+        {
+            lastNumTransaction = 1L;
+        }
+
+        this.numTransaction = ++lastNumTransaction;
+    }
+
 
     public enum MovementType
     {
@@ -106,7 +120,7 @@ public class Movement implements Serializable
         BONUS("Bonificação", new BigDecimal(1)),
         DEPOSIT("Deposito", new BigDecimal(1)),
         TRANSFER_SOURCE("Origem da Transferência", new BigDecimal(-1)),
-        TRANSFER_TARGER("Destino da Transferência", new BigDecimal(1));
+        TRANSFER_TARGET("Destino da Transferência", new BigDecimal(1));
 
         String displayName;
         BigDecimal factor;
