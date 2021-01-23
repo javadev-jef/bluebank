@@ -5,6 +5,7 @@ import domtoimage from 'dom-to-image';
 
 import "./style.scss"
 import { formatCurrencyValue } from "../../../utils/functionUtils";
+import Logo from "../../../components/Logo";
 
 const BlueCoin = (({onClose = ()=>{}, data, qrcode}) =>
 {
@@ -36,10 +37,7 @@ const BlueCoin = (({onClose = ()=>{}, data, qrcode}) =>
             <div className="side-right">
 
                <header>
-                   <h1 className="logo">
-                       <span className="part-01">Blue</span>
-                       <span className="part-02">Bank</span>
-                   </h1>
+                   <Logo toPage="#"/>
                    <div className="actions">
                        <FiPrinter onClick={onDownload}/>
                        <FiX onClick={onClose}/>

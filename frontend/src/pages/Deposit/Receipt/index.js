@@ -4,6 +4,7 @@ import {FiX, FiPrinter} from "react-icons/fi";
 
 import "./style.scss"
 import { formatCurrencyValue } from "../../../utils/functionUtils";
+import Logo from "../../../components/Logo";
 
 const Receipt = React.forwardRef(({onClose = ()=>{}, onPrint = ()=>{}, data, serverComponents}, ref) =>
 {
@@ -45,10 +46,7 @@ const Receipt = React.forwardRef(({onClose = ()=>{}, onPrint = ()=>{}, data, ser
                    <span className="date">
                        {moment(data.dateTime).format("LLLL")}
                    </span>
-                   <h1 className="logo">
-                       <span className="part-01">Blue</span>
-                       <span className="part-02">Bank</span>
-                   </h1>
+                   <Logo toPage="#"/>
                    <div className="actions">
                        <FiPrinter onClick={onPrint}/>
                        <FiX onClick={onClose}/>

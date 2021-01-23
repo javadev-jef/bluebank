@@ -12,6 +12,7 @@ import { API_ENDPOINT } from "../../constants/constants";
 import "./style.scss";
 
 import axios from "axios";
+import Logo from "../../components/Logo";
 
 const Profile = () =>
 {
@@ -93,10 +94,7 @@ const Profile = () =>
         <div className="profile-container">
             <main>
                 <section>
-                    <h1 className="logo">
-                        <span className="part-01">Blue</span>
-                        <span className="part-02">Bank</span>
-                    </h1>
+                    <Logo toPage="#"/>
                     <h2>Meus Dados</h2>
                     <p>Beneficios em manter seu cadastro atualizado:</p>
                     <ol>

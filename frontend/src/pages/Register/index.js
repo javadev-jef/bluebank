@@ -7,6 +7,7 @@ import Form from "./Form";
 import { API_ENDPOINT } from "../../constants/constants";
 import axios from "axios";
 import AlertMessage from "../../components/AlertMessage";
+import Logo from "../../components/Logo";
 
 export default function Register()
 {
@@ -92,10 +93,7 @@ export default function Register()
         <div className="register-container">
             <div className="content">
                 <section>
-                    <h1 className="logo">
-                        <span className="part-01">Blue</span>
-                        <span className="part-02">Bank</span>
-                    </h1>
+                    <Logo toPage="#"/>
                     <h1>Cadastro</h1>
                     <p>Faça seu cadastro sem burocracia.</p>
                     <p>Somos o único banco a oferecer uma conta corrente e poupança 100% digital e gratuita.</p>

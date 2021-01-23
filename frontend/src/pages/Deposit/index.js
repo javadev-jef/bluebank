@@ -15,6 +15,7 @@ import { useReactToPrint } from 'react-to-print';
 import { API_ENDPOINT } from "../../constants/constants";
 import axios from "axios";
 import {serialize} from "object-to-formdata";
+import Logo from "../../components/Logo";
 
 const Deposit = () =>
 {
@@ -121,11 +122,7 @@ const Deposit = () =>
             <main className={!logged ? "content" : {}}>
                 <section>
 
-                    {!logged &&
-                    <h1 className="logo">
-                        <span className="part-01">Blue</span>
-                        <span className="part-02">Bank</span>
-                    </h1>}
+                    {!logged && <Logo toPage="#"/>}
 
                     <h2>Depósito Bancário</h2>
                     <p>Depositos realizados após 18h00 serão compensados somente no próximo dia.</p>
