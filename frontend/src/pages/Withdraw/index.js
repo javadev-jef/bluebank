@@ -13,6 +13,7 @@ import saqueImg from "../../assets/withdraw_money.svg";
 import { API_ENDPOINT } from "../../constants/constants";
 
 import axios from "axios";
+import { useDefaultResponseServer } from "../../hooks/useDefaultResponseServer";
 
 
 const Withdraw = () =>
@@ -24,11 +25,10 @@ const Withdraw = () =>
     const [clearForm, setClearForm] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
     const [alertProps, setAlertProps] = useState({open: false});
-    const [serverComponents, setServerComponents] = useState([]);
+    const {serverComponents} = useDefaultResponseServer(setAlertProps);
 
     const onSuccessForm = async (data) =>
     {
-        console.log(data);
         try
         {
             setLoading(true);
@@ -72,30 +72,8 @@ const Withdraw = () =>
         if(Object.entries(errors).length > 0)
         {
             setAlertProps({type: "error", message: "Todos os campos em destaque são obrigatórios.", open: true});
-            console.log(errors);
         }
     },[]);
-
-    useState(() =>
-    {
-        const getDefaultStatusServer = async () =>
-        {
-            try
-            {
-                const response = await axios.get(`${API_ENDPOINT}/default-response`);
-                setServerComponents(response.data);
-            }
-            catch(error)
-            {
-                if(!error.response)
-                {
-                    setAlertProps({type: "error", message: "Erro na tentativa de conexão com o servidor.", open: true});
-                }
-            }
-        };
-
-        getDefaultStatusServer();
-    }, []);
 
     return(
         <div className="withdraw-container">

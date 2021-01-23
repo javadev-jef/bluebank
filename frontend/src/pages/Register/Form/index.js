@@ -50,7 +50,6 @@ const Form = ({onError = ()=>{}, onSuccess = ()=>{}, loadingData, serverComponen
 
     return(
         <form autoComplete="off" onSubmit={handleSubmit(onSuccess)}>
-
             <Grid container spacing={1}>
 
                 <Grid item xs={8}>
@@ -96,7 +95,6 @@ const Form = ({onError = ()=>{}, onSuccess = ()=>{}, loadingData, serverComponen
                         onChange={setBirthDateTemp}
                         title={errors.birthDate?.message}
                         className={errors.birthDate && "input-error"}
-                        
                     />
                 </Grid>
 
@@ -151,7 +149,7 @@ const Form = ({onError = ()=>{}, onSuccess = ()=>{}, loadingData, serverComponen
                 <Grid item xs={6}>
                     <Input 
                         type="password"
-                        placeholder="Repetir Senha"  
+                        placeholder="Repetir Senha"
                         name="passwordConfirm"  
                         refForm={register} 
                         title={errors.passwordConfirm?.message}

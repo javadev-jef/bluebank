@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 
 import "./style.scss";
 import { Link, useHistory } from "react-router-dom";
@@ -8,15 +8,16 @@ import { API_ENDPOINT } from "../../constants/constants";
 import axios from "axios";
 import AlertMessage from "../../components/AlertMessage";
 import Logo from "../../components/Logo";
+import { useDefaultResponseServer } from "../../hooks/useDefaultResponseServer";
 
 export default function Register()
 {
     const [alertProps, setAlertProps] = useState({open: false});
     const [loading, setLoading] = useState(false);
-    const [serverComponents, setServerComponents] = useState([]);
     const [errors, setErrors] = useState([]);
     const [clearForm, setClearForm] = useState(false);
     const history = useHistory();
+    const {serverComponents} = useDefaultResponseServer(setAlertProps);
 
     const onErrorForm = useCallback((errors) =>
     {
@@ -64,30 +65,6 @@ export default function Register()
             setLoading(false);
         }
     }
-
-    useEffect(()=>
-    {
-        /**
-         * GET A DEFAULT RESPONSE FOR ANY PAGES
-         */
-        const getDefaultResponseServer = async () =>
-        {
-            try
-            {
-                const response = await axios.get(`${API_ENDPOINT}/default-response`);
-                setServerComponents(response.data);
-            }
-            catch(error)
-            {
-                if(!error.response)
-                {
-                    setAlertProps({type: "error", message: "Erro na tentativa de conexão com o servidor.", open: true});
-                }
-            }
-        };
-
-        getDefaultResponseServer();
-    }, []);
 
     return(
         <div className="register-container">

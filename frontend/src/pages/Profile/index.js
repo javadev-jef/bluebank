@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 
 import { Link } from "react-router-dom";
 
@@ -13,13 +13,14 @@ import "./style.scss";
 
 import axios from "axios";
 import Logo from "../../components/Logo";
+import { useDefaultResponseServer } from "../../hooks/useDefaultResponseServer";
 
 const Profile = () =>
 {
     const [alertProps, setAlertProps] = useState({open: false});
     const [loading, setLoading] = useState(false);
-    const [serverComponents, setServerComponents] = useState([]);
     const [errors, setErrors] = useState([]);
+    const {serverComponents} = useDefaultResponseServer(setAlertProps);
     
     const onErrorForm = useCallback((errors) =>
     {
@@ -65,30 +66,6 @@ const Profile = () =>
             setLoading(false);
         }
     }
-
-    useEffect(()=>
-    {
-        /**
-         * GET A DEFAULT RESPONSE FOR ANY PAGES
-         */
-        const getDefaultResponseServer = async () =>
-        {
-            try
-            {
-                const response = await axios.get(`${API_ENDPOINT}/default-response`);
-                setServerComponents(response.data);
-            }
-            catch(error)
-            {
-                if(!error.response)
-                {
-                    setAlertProps({type: "error", message: "Erro na tentativa de conexão com o servidor.", open: true});
-                }
-            }
-        };
-
-        getDefaultResponseServer();
-    }, []);
 
     return(
         <div className="profile-container">

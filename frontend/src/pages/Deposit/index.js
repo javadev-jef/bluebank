@@ -16,6 +16,7 @@ import { API_ENDPOINT } from "../../constants/constants";
 import axios from "axios";
 import {serialize} from "object-to-formdata";
 import Logo from "../../components/Logo";
+import { useDefaultResponseServer } from "../../hooks/useDefaultResponseServer";
 
 const Deposit = () =>
 {
@@ -25,9 +26,9 @@ const Deposit = () =>
     const [openDialog, setOpenDialog] = useState(false);
     const [data, setData] = useState([]);
     const reciboRef = useRef();
-    const [serverComponents, setServerComponents] = useState([]);
     const [clearForm, setClearForm] = useState(false);
     const [errors, setErrors] = useState([]);
+    const {serverComponents} = useDefaultResponseServer(setAlertProps);
 
     const handlePrint = useReactToPrint
     ({
@@ -86,27 +87,6 @@ const Deposit = () =>
             setAlertProps({type: "error", message: "Todos os campos em destaque são obrigatórios.", open: true});
             console.log(errors);
         }
-    }, []);
-
-    useState(() =>
-    {
-        const getDefaultStatusServer = async () =>
-        {
-            try
-            {
-                const response = await axios.get(`${API_ENDPOINT}/default-response`);
-                setServerComponents(response.data);
-            }
-            catch(error)
-            {
-                if(!error.response)
-                {
-                    setAlertProps({type: "error", message: "Erro na tentativa de conexão com o servidor.", open: true});
-                }
-            }
-        };
-
-        getDefaultStatusServer();
     }, []);
 
     useEffect(()=>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 
 import Navbar from "../../components/Navbar";
 import AlertMessage from "../../components/AlertMessage";
@@ -11,6 +11,7 @@ import { isFutureDate } from "../../utils/functionUtils";
 
 import axios from "axios";
 import "./style.scss";
+import { useDefaultResponseServer } from "../../hooks/useDefaultResponseServer";
 
 export default function Transfer()
 {
@@ -18,7 +19,7 @@ export default function Transfer()
     const [loading, setLoading] = useState(false);
     const [clearForm, setClearForm] = useState(false);
     const [alertProps, setAlertProps] = useState({open: false});
-    const [serverComponents, setServerComponents] = useState([]);
+    const {serverComponents} = useDefaultResponseServer(setAlertProps);
 
     const onFormError = useCallback((errors) =>
     {
@@ -65,30 +66,6 @@ export default function Transfer()
             setLoading(false);
         }
     }
-
-    useEffect(()=>
-    {
-        /**
-         * A default server response for any pages
-         */
-        const getDefaultResponseServer = async () =>
-        {
-            try
-            {
-                const response = await axios.get(`${API_ENDPOINT}/default-response`);
-                setServerComponents(response.data);
-            }
-            catch(error)
-            {
-                if(!error.response)
-                {
-                    setAlertProps({type: "error", message: "Erro na tentativa de conexão com o servidor.", open: true});
-                }
-            }
-        };
-
-        getDefaultResponseServer();
-    }, []);
 
     return(
         <div className="transfer-container">

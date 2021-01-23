@@ -11,9 +11,8 @@ import Form from "./Form";
 import "./style.scss";
 
 import {formatCurrencyValue} from "../../utils/functionUtils";
-import { API_ENDPOINT } from "../../constants/constants";
 
-import axios from "axios";
+import { useDefaultResponseServer } from "../../hooks/useDefaultResponseServer";
 
 
 export default function Statement()
@@ -21,7 +20,7 @@ export default function Statement()
     const statements = useStatements();
     const [alertProps, setAlertProps] = useState({open: false});
     const [currentAccount, setCurrentAccount] = useState(0);
-    const [serverComponents, setServerComponents] = useState([]);
+    const {serverComponents} = useDefaultResponseServer(setAlertProps);
 
     const progressStyle = {
         marginLeft: 4,
@@ -55,27 +54,6 @@ export default function Statement()
         statements.clearStatement();
     }, // eslint-disable-next-line react-hooks/exhaustive-deps
     [currentAccount]);
-
-    useState(() =>
-    {
-        const getDefaultStatusServer = async () =>
-        {
-            try
-            {
-                const response = await axios.get(`${API_ENDPOINT}/default-response`);
-                setServerComponents(response.data);
-            }
-            catch(error)
-            {
-                if(!error.response)
-                {
-                    setAlertProps({type: "error", message: "Erro na tentativa de conexão com o servidor.", open: true});
-                }
-            }
-        };
-
-        getDefaultStatusServer();
-    }, []);
 
     return(
         <div className="statement-container">
