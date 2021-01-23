@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 import br.com.bluebank.domain.Account.Account.AccountType;
+import br.com.bluebank.domain.Movement.Movement.MovementType;
 import br.com.bluebank.domain.User.User;
 
 public interface MovementRepository extends PagingAndSortingRepository<Movement, Integer>
@@ -17,6 +18,9 @@ public interface MovementRepository extends PagingAndSortingRepository<Movement,
 
     @Query("SELECT m FROM Movement AS m WHERE m.scheduled = true AND CAST(m.date AS LocalDate) = ?1")
     public List<Movement> findAllScheduledByDate(LocalDate date);
+
+    @Query("SELECT m FROM Movement AS m WHERE m.scheduled = true AND CAST(m.date AS LocalDate) = ?1 AND m.movementType = ?2")
+    public List<Movement> findScheduledByDateAndType(LocalDate date, MovementType type);
 
     @Query("SELECT m FROM Movement AS m WHERE m.scheduled = true AND CAST(m.date AS LocalDate) < ?1")
     public List<Movement> findAllFailedMovementScheduledByDate(LocalDate date);

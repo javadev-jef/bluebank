@@ -23,6 +23,7 @@ export const useStatements = () =>
     {
         try
         {
+            setData([{}]);
             setLoading(true);
             setResponse({type: null, msg: null, loading: true});
 
@@ -30,12 +31,12 @@ export const useStatements = () =>
             setData(response.data.movements);
             setBalance(response.data.balance);
 
-            setLoading(false);
+            //setLoading(false);
             setResponse({type: "info", msg: "Busca realizada com sucesso!", loading: false});
         }
         catch(error)
         {
-            setData([])
+            setData([]);
             setResponse({type: "error", msg: "Erro ao buscar dados do servidor.", loading: false});
         }
         finally{

@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import br.com.bluebank.application.service.exception.InsufficienteBalanceException;
 import br.com.bluebank.application.service.exception.NoAccountFoundException;
@@ -15,9 +16,9 @@ import br.com.bluebank.application.service.exception.TransferException;
 import br.com.bluebank.domain.Account.Account;
 import br.com.bluebank.domain.Account.AccountRepository;
 import br.com.bluebank.domain.Movement.Movement;
+import br.com.bluebank.domain.Movement.Movement.MovementType;
 import br.com.bluebank.domain.Movement.MovementRepository;
 import br.com.bluebank.domain.Movement.TransferForm;
-import br.com.bluebank.domain.Movement.Movement.MovementType;
 import br.com.bluebank.utils.MovementServiceUtils;
 
 @Service
@@ -29,6 +30,7 @@ public class TransferService
     @Autowired
     private MovementRepository movementRepository;
 
+    @Transactional(rollbackFor = Exception.class)
     public void save(TransferForm transfer, Account userAccount) throws InsufficienteBalanceException, TransferException 
     {
         Account fromAccount = userAccount;
@@ -60,6 +62,8 @@ public class TransferService
         LocalDateTime whenToDo = transfer.getWhenToDo().atTime(LocalTime.now());
         LocalDateTime endOfDay = LocalDate.now().atTime(23, 59);
 
+        Long lastNumTransaction = movementRepository.findLastNumTransaction();
+
         // Source Account
         Movement mvt = new Movement();
         mvt.setDescription(msgFromAccount);
@@ -68,6 +72,7 @@ public class TransferService
         mvt.setTempAmount(transfer.getAmount());
         mvt.setScheduled(whenToDo.isAfter(endOfDay));
         mvt.setAccount(fromAccount);
+        mvt.setNumTransaction(lastNumTransaction);
         mvt = MovementServiceUtils.prepareToSave(mvt, movementRepository);
         movementRepository.save(mvt);
 
@@ -75,10 +80,11 @@ public class TransferService
         mvt = new Movement();
         mvt.setDescription(msgToAccount);
         mvt.setDate(whenToDo);
-        mvt.setMovementType(MovementType.TRANSFER_TARGER);
+        mvt.setMovementType(MovementType.TRANSFER_TARGET);
         mvt.setTempAmount(transfer.getAmount());
         mvt.setScheduled(whenToDo.isAfter(endOfDay));
         mvt.setAccount(toAccount);
+        mvt.setNumTransaction(lastNumTransaction);
         mvt = MovementServiceUtils.prepareToSave(mvt, movementRepository);
         movementRepository.save(mvt);
     }

@@ -1,6 +1,7 @@
 package br.com.bluebank.application.service;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.LinkedHashMap;
@@ -32,9 +33,9 @@ import br.com.bluebank.domain.Coin.CoinRepository;
 import br.com.bluebank.domain.Movement.DepositForm;
 import br.com.bluebank.domain.Movement.Movement;
 import br.com.bluebank.domain.Movement.Movement.MovementType;
+import br.com.bluebank.domain.Movement.MovementRepository;
 import br.com.bluebank.utils.CashType;
 import br.com.bluebank.utils.MovementServiceUtils;
-import br.com.bluebank.domain.Movement.MovementRepository;
 
 @Service
 public class DepositService 
@@ -71,11 +72,19 @@ public class DepositService
             dForm = extractAmountFromFile(dForm);
         }
 
+        LocalDateTime currentDate = LocalDateTime.now();
+        LocalDateTime limitDate = LocalDate.now().atTime(17, 59);
+        LocalDateTime finalDate = currentDate.isAfter(limitDate) ? LocalDateTime.now().plusDays(1) : LocalDateTime.now();
+
+        Long lastNumTransaction = movementRepository.findLastNumTransaction();
+
         Movement mvd = new Movement();
         mvd.setAccount(account);
-        mvd.setDate(LocalDateTime.now());
+        mvd.setDate(finalDate);
         mvd.setTempAmount(dForm.getAmount());
+        mvd.setScheduled(currentDate.isAfter(limitDate));
         mvd.setMovementType(MovementType.DEPOSIT);
+        mvd.setNumTransaction(lastNumTransaction);
         mvd = MovementServiceUtils.prepareToSave(mvd, movementRepository);
         movementRepository.save(mvd);
     }

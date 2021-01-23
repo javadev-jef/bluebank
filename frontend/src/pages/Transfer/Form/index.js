@@ -20,7 +20,7 @@ const Form = ({onError = () => {}, onSuccess = () => {}, loadingData = false, cl
 {
     const {register, errors, clearErrors, handleSubmit, watch, reset, setError} = useForm(
     {
-        resolver: transferForm(new Date())
+        resolver: transferForm()
     });
 
     const watchAmount = watch("amount", 0);

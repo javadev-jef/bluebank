@@ -20,3 +20,8 @@ export const getAgeOfMajority = (serverDate) =>
 {
     return moment(serverDate, DATE_FORMAT, true).subtract(18, "years");
 }
+
+export const isFutureDate = (date) =>
+{
+    return moment(date, DATE_FORMAT, true).diff(moment(new Date(), DATE_FORMAT, true).add(1, "days"), "days") >= 0;
+}

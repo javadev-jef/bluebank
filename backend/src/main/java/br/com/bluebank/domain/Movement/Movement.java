@@ -114,6 +114,7 @@ public class Movement implements Serializable
     }
 
 
+    @Getter
     public enum MovementType
     {
         WITHDRAW("Saque", new BigDecimal(-1)),

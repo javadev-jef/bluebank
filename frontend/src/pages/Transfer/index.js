@@ -7,6 +7,7 @@ import Form from "./Form";
 import transferImg from "../../assets/transfer_money.svg";
 
 import { API_ENDPOINT } from "../../constants/constants";
+import { isFutureDate } from "../../utils/functionUtils";
 
 import axios from "axios";
 import "./style.scss";
@@ -29,13 +30,12 @@ export default function Transfer()
 
     const onFormSuccess = async (data) =>
     {
-        console.log(data);
         setLoading(true);
 
         try
         {
 	        await axios.post(`${API_ENDPOINT}/user/transfer`, data);
-            setAlertProps({type: "success", message: "Transferência realizada com sucesso.", open: true});
+            setAlertProps({type: "success", message: `Transferência ${isFutureDate(data.whenToDo) ? 'agendada' : 'realizada'} com sucesso.`, open: true});
             setClearForm(true);
         }
         catch(error)
