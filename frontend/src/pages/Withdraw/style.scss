@@ -45,3 +45,27 @@ div.withdraw-container
         }
     }
 }
+
+// Media Screen
+@media screen and (max-width: 1090px)
+{
+    div.withdraw-container
+    {
+        main
+        {
+            flex-direction: column;
+            align-items: center;
+
+            section
+            {
+                p, ol, img
+                {
+                    display: none;
+                }
+
+                width: 600px;
+                margin: 0;
+            }
+        }
+    }
+}
