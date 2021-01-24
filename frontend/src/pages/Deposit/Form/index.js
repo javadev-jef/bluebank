@@ -7,10 +7,13 @@ import { Link } from "react-router-dom";
 import {MdAttachFile} from "react-icons/md";
 import Input from "../../../components/Input";
 import Select from "../../../components/Select";
+import InputDecimalFormat from "../../../components/InputDecimalFormat";
+import InputNumberFormat from "../../../components/InputNumberFormat";
+import { CNPJ_MASK, CPF_MASK, PHONE_MASK_01, PHONE_MASK_02 } from "../../../constants/constants";
 
 const Form = ({onSuccess = () =>{}, onError = () =>{}, isUserLogged = false, loadingData = false, serverComponents, clearForm, errorServer}) =>
 {
-    const {register, clearErrors,setError, errors, handleSubmit, reset} = useForm({resolver: depositForm()});
+    const {register, control, clearErrors,setError, errors, handleSubmit, reset} = useForm({resolver: depositForm()});
 
     const {accountTypes, cashTypes} = serverComponents;
 
@@ -40,7 +43,7 @@ const Form = ({onSuccess = () =>{}, onError = () =>{}, isUserLogged = false, loa
         }
     }, 
     [errorServer, setError]);
-    
+
     return(
         <form onSubmit={handleSubmit(onSuccess)} autoComplete={"off"}>
             <fieldset>
@@ -97,20 +100,24 @@ const Form = ({onSuccess = () =>{}, onError = () =>{}, isUserLogged = false, loa
                     </Grid>
 
                     <Grid item xs={6}>
-                        <Input 
+                        <InputNumberFormat
+                            useFormControl={control}
                             name="cpfCnpj"
                             placeholder="CPF/CNPJ"
-                            refForm={register}
+                            mask={{length: 11, value: CPF_MASK}}
+                            altMask={{length:14, value: CNPJ_MASK}}
                             title={errors.cpfCnpj?.message}
                             className={errors.cpfCnpj && "input-error"}
                         />
                     </Grid>
 
                     <Grid item xs={4}>
-                        <Input 
+                        <InputNumberFormat
+                            useFormControl={control}
                             name="phone"
                             placeholder="Telefone"
-                            refForm={register}
+                            mask={{length: 10, value: PHONE_MASK_01}}
+                            altMask={{length:11, value: PHONE_MASK_02}}
                             title={errors.phone?.message}
                             className={errors.phone && "input-error"}
                         />
@@ -151,18 +158,19 @@ const Form = ({onSuccess = () =>{}, onError = () =>{}, isUserLogged = false, loa
                                     multiple={false}
                                 />
                                 </>
-                            :
-                                <Input 
-                                    name="amount"
+                            :  
+                                <InputDecimalFormat
                                     placeholder="Valor Depósito"
-                                    refForm={register}
+                                    useFormControl={control}
+                                    name="amount"
                                     title={errors.amount?.message}
                                     className={errors.amount && "input-error"}
-                                />   
+                                />
                         }
                     </Grid>
 
                 </Grid>
+                
             </fieldset>
             
             <div className="input-group">

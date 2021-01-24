@@ -58,7 +58,7 @@ export const withdrawForm = () =>  yupResolver(
 export const depositForm = () =>  yupResolver(
     yup.object().shape(
     {
-        numAccount: yup.string().required().min(5),
+        numAccount: yup.string().required().matches(/^\d+$/, FORM_ERROR_MESSAGES.strToNumberError).min(5),
         accountType: yup.string().required(),
         userName: yup.string().required().min(4),
         depositorName: yup.string().required().min(6),
@@ -87,7 +87,7 @@ export const transferForm = () => yupResolver(
     {
         userAccountType: yup.string().required(),
         userName: yup.string().required().min(4),
-        numAccount: yup.string().required().min(5),
+        numAccount: yup.string().required().matches(/^\d+$/, FORM_ERROR_MESSAGES.strToNumberError).min(5),
         accountType: yup.string().required(),
         favoredName: yup.string().required().min(4),
         personType: yup.string().required(),

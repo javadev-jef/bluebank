@@ -7,6 +7,14 @@ export const API_ENDPOINT = "http://localhost:8080/api";
 
 export const DATE_FORMAT = "DD/MM/YYYY";
 
+export const CPF_MASK = "###.###.###-##";
+
+export const CNPJ_MASK = "##.###.###/####-##";
+
+export const PHONE_MASK_01 = "(##) ####-####";
+
+export const PHONE_MASK_02 = "(##) # ####-####";
+
 export const FORM_ERROR_MESSAGES = {
     required: "O campo em destaque é obrigatório",
     maxLength: "O tamanho do campo informado é muito grande",

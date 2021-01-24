@@ -11,10 +11,11 @@ import { formatCurrencyValue } from "../../../utils/functionUtils";
 import { API_ENDPOINT } from "../../../constants/constants";
 
 import axios from "axios";
+import InputDecimalFormat from "../../../components/InputDecimalFormat";
 
 const Form = ({loadingData = false, onSuccess = ()=>{}, onError = ()=>{}, errorServer, serverComponents, clearForm}) =>
 {
-    const {register, errors, setError, handleSubmit, clearErrors, watch, reset} = useForm({resolver: withdrawForm()});
+    const {register, control, errors, setError, handleSubmit, clearErrors, watch, reset} = useForm({resolver: withdrawForm()});
     const [balance, setBalance] = useState(0);
     const watchAmount = watch("amount", 0);
     const {accountTypes, cashTypes} = serverComponents;
@@ -116,15 +117,13 @@ const Form = ({loadingData = false, onSuccess = ()=>{}, onError = ()=>{}, errorS
                     </Grid>
 
                     <Grid item xs={7}>
-                       <Input 
-                            mask={"9.999,99"}
+                        <InputDecimalFormat
                             placeholder="Valor"
-                            name="amount" 
-                            refForm={register}
+                            useFormControl={control}
+                            name="amount"
                             title={errors.amount?.message}
                             className={errors.amount && "input-error"}
-                       />
-
+                        />
                     </Grid>
                 </Grid>
             </fieldset>

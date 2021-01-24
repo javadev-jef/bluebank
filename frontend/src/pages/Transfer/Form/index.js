@@ -12,15 +12,17 @@ import DatePicker from "../../../components/DatePicker";
 import Button from "../../../components/Button";
 
 import {transferForm} from "../../../constants/formSchema";
-import { API_ENDPOINT } from "../../../constants/constants";
+import { API_ENDPOINT, CNPJ_MASK, CPF_MASK } from "../../../constants/constants";
 
 import axios from "axios";
+import InputDecimalFormat from "../../../components/InputDecimalFormat";
+import InputNumberFormat from "../../../components/InputNumberFormat";
 
 const Form = ({onError = () => {}, onSuccess = () => {}, loadingData = false, clearForm = false, errorServer, serverComponents}) =>
 {
-    const {register, errors, clearErrors, handleSubmit, watch, reset, setError} = useForm(
+    const {register, errors, control, clearErrors, handleSubmit, watch, reset, setError} = useForm(
     {
-        resolver: transferForm()
+        resolver: transferForm(),
     });
 
     const watchAmount = watch("amount", 0);
@@ -63,7 +65,7 @@ const Form = ({onError = () => {}, onSuccess = () => {}, loadingData = false, cl
     {
         if(clearForm)
         {
-            reset();
+            reset({});
             setSelectedTempDate(null);
             getUserBalanceServer();
         }
@@ -165,20 +167,21 @@ const Form = ({onError = () => {}, onSuccess = () => {}, loadingData = false, cl
                     </Grid>
 
                     <Grid item xs={4}>
-                        <Input 
-                            placeholder={watch("personType") ? watch("personType") : "CPF/CNPJ"} 
-                            refForm={register}
-                            disabled={!watch("personType")}
+                        <InputNumberFormat
+                            useFormControl={control}
                             name="cpfCnpj"
+                            placeholder={watch("personType") ? watch("personType") : "CPF/CNPJ"}
+                            format={watch("personType") === "CPF" ? CPF_MASK : CNPJ_MASK}
                             title={errors.cpfCnpj?.message}
                             className={errors.cpfCnpj && "input-error"}
+                            disabled={!watch("personType") || clearForm}
                         />
                     </Grid>
 
                     <Grid item xs={4}>
-                        <Input 
-                            placeholder="Valor" 
-                            refForm={register}
+                        <InputDecimalFormat
+                            placeholder="Valor"
+                            useFormControl={control}
                             name="amount"
                             title={errors.amount?.message}
                             className={errors.amount && "input-error"}

@@ -37,7 +37,7 @@ export default function Register()
             await axios.post(`${API_ENDPOINT}/user/register`, data);
             setClearForm(true);
             setAlertProps({type: "success", message: "Cadastro realizado com sucesso!", open: true});
-            setTimeout(() => history.push("/"), 4000);
+            setTimeout(() => history.push("/"), 6000);
         }
         catch(error)
         {

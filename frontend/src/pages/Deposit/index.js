@@ -85,7 +85,6 @@ const Deposit = () =>
         if(Object.entries(errors).length > 0)
         {
             setAlertProps({type: "error", message: "Todos os campos em destaque são obrigatórios.", open: true});
-            console.log(errors);
         }
     }, []);
 
