@@ -49,10 +49,13 @@ public class InsertDataForTesting
     @Value("${spring.profiles.active}")
     private String activeProfile;
 
+    @Value("${spring.jpa.hibernate.ddl-auto}")
+    private String dllMode;
+
     @EventListener
     public void onApplicationEvent(ContextRefreshedEvent event) throws BlueBankException 
     {
-        if(activeProfile.toLowerCase().equals("dev"))
+        if(activeProfile.toLowerCase().equals("dev") && dllMode.toLowerCase().equals("create-drop"))
         {
             logger.info("InsertDataForTesting....RUNNING");
 
