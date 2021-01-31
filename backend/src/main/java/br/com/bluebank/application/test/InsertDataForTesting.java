@@ -44,27 +44,29 @@ public class InsertDataForTesting
     @Autowired
     private TransferService transferService;
 
-    private static final Logger logger = LoggerFactory.getLogger(InsertDataForTesting.class);
-
     @Value("${spring.profiles.active}")
     private String activeProfile;
-
+    
     @Value("${spring.jpa.hibernate.ddl-auto}")
     private String dllMode;
+
+    private final String CLASS_NAME = this.getClass().getSimpleName();
+
+    private static final Logger logger = LoggerFactory.getLogger(InsertDataForTesting.class);
 
     @EventListener
     public void onApplicationEvent(ContextRefreshedEvent event) throws BlueBankException 
     {
         if(activeProfile.toLowerCase().equals("dev") && dllMode.toLowerCase().equals("create-drop"))
         {
-            logger.info("InsertDataForTesting....RUNNING");
+            logger.debug(CLASS_NAME.concat("...RUNNING"));
 
             User[] users = users();
             List<Account> allAccounts = new ArrayList<>();
 
             for (int i = 0; i <= (users.length - 1); i++) {
                 // Fetch user accounts
-                allAccounts = accountRepository.findByUser_Id(users[i].getId());
+                allAccounts = accountRepository.findByUsername(users[i].getCpfCnpj());
 
                 Account[] array = new Account[allAccounts.size()];
                 array = allAccounts.toArray(array);
@@ -73,9 +75,9 @@ public class InsertDataForTesting
                 allAccounts.clear();
             }
 
-            //setTransfers();
+            setTransfers();
 
-            logger.info("InsertDataForTesting....FINISHED");
+            logger.debug(CLASS_NAME.concat("...FINISHED"));
         }
     }
 

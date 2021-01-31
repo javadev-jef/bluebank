@@ -4,6 +4,8 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,12 +20,31 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import br.com.bluebank.application.service.exception.BlockedTokenException;
 import br.com.bluebank.application.service.exception.BlueBankException;
 import br.com.bluebank.application.service.exception.NoAccountFoundException;
+import io.jsonwebtoken.ExpiredJwtException;
 
 @RestControllerAdvice
 public class WebRequestExceptionHandler extends ResponseEntityExceptionHandler 
 {
+    private final String CLASS_NAME;
+    private static final Logger logger = LoggerFactory.getLogger(WebRequestExceptionHandler.class);
+
+    public WebRequestExceptionHandler() 
+    {
+        this.CLASS_NAME = this.getClass().getSimpleName();
+        logger.debug(CLASS_NAME.concat("... OK!"));
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(code = HttpStatus.UNAUTHORIZED)
+    public RestResponseError handleException(ExpiredJwtException e)
+    {
+        logger.debug(CLASS_NAME.concat("...... EXPIRED TOKEN!"));
+        return RestResponseError.fromMessage("Sua sessão expirou, realize um novo login para continuar!");
+    }
+    
     @ExceptionHandler
     @ResponseStatus(code = HttpStatus.BAD_REQUEST)
     public RestResponseError handleException(BlueBankException ex) 
@@ -34,6 +55,14 @@ public class WebRequestExceptionHandler extends ResponseEntityExceptionHandler
         }
 
         return RestResponseError.fromMessage(ex.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(code = HttpStatus.UNAUTHORIZED)
+    public RestResponseError handleException(BlockedTokenException e)
+    {
+        logger.debug(CLASS_NAME.concat("...... BLOCKED TOKEN!"));
+        return RestResponseError.fromMessage("Token autenticação inválido para conexão.");
     }
 
     @ExceptionHandler

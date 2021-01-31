@@ -16,6 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import br.com.bluebank.application.service.exception.InsufficienteBalanceException;
 import br.com.bluebank.domain.Account.Account;
+import br.com.bluebank.domain.Account.AccountRepository;
+import br.com.bluebank.domain.Blacklist.Blacklist;
+import br.com.bluebank.domain.Blacklist.BlacklistRepository;
 import br.com.bluebank.domain.Movement.Movement;
 import br.com.bluebank.domain.Movement.Movement.MovementType;
 import br.com.bluebank.domain.Movement.MovementRepository;
@@ -28,19 +31,34 @@ public class ScheduledTasks
     private MovementRepository movementRepository;
 
     @Autowired
+    private AccountRepository accountRepository;
+
+    @Autowired
     private MovementService movementService;
+
+    @Autowired
+    private BlacklistRepository blacklistRepository;
+
+    private final String CLASS_NAME = this.getClass().getSimpleName();
 
     private static final Logger logger = LoggerFactory.getLogger(ScheduledTasks.class);
 
     @Scheduled(cron = "0 00 00 * * *")
     public void checkAndPersistSchedules() throws InsufficienteBalanceException
     {
-        logger.info("ScheduledTasks....RUNNING");
+        logger.debug(CLASS_NAME.concat("....RUNNING"));
 
+        scheduledTokenBlacklist();
         scheduledDeposits();
         scheduledTransfers();
 
-        logger.info("ScheduledTasks....FINISHED");
+        logger.debug(CLASS_NAME.concat("....FINISHED"));
+    }
+
+    public void scheduledTokenBlacklist()
+    {
+        List<Blacklist> blockedTokens = blacklistRepository.deleteByExpLessThanEqual(LocalDateTime.now());
+        logger.debug(CLASS_NAME.concat("......DELETED BLOCKED TOKENS: "+blockedTokens.size()));
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -50,12 +68,20 @@ public class ScheduledTasks
 
         for(Movement deposit : deposits)
         {
-            BigDecimal balance = movementRepository.findBalanceByNumAccount(deposit.getAccount().getNumAccount());
+            Account account = deposit.getAccount();
+            BigDecimal balance = account.getBalance();
 
             deposit.setScheduled(false);
             deposit.setDate(LocalDateTime.now());
             deposit.setBalance(balance);
+            account.setBalance(deposit.getBalance());
+            
             movementRepository.save(deposit);
+
+            if(!deposit.getScheduled())
+            {
+                accountRepository.save(deposit.getAccount());
+            }
         }
     }
 
@@ -79,12 +105,20 @@ public class ScheduledTasks
             }
             catch(InsufficienteBalanceException ex)
             {
-                BigDecimal balance = movementRepository.findBalanceByNumAccount(transferSource.getAccount().getNumAccount());
+                Account account = transferSource.getAccount();
+                BigDecimal balance = account.getBalance();
+
                 transferSource.setFinalAmount(BigDecimal.ZERO);
                 transferSource.setBalance(balance);
+                account.setBalance(transferSource.getBalance());
 
                 movementRepository.save(transferSource);
                 movementRepository.delete(transferTarget);
+                
+                if(!transferSource.getScheduled())
+                {
+                    accountRepository.save(account);
+                }
             }
 
             i = transfers.removeAll(List.of(transferTarget, transferSource)) ? 0 : i;
@@ -115,7 +149,8 @@ public class ScheduledTasks
     {
         Movement mv = prepareMovement(mvts, MovementType.TRANSFER_SOURCE, mvTarget.getNumTransaction());
         
-        BigDecimal balance = movementRepository.findBalanceByNumAccount(mv.getAccount().getNumAccount());
+        Account account = mv.getAccount();
+        BigDecimal balance = account.getBalance();
 
         if(balance.compareTo(mv.getTempAmount()) == -1)
         {

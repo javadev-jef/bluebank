@@ -85,8 +85,13 @@ public class DepositService
         mvd.setScheduled(currentDate.isAfter(limitDate));
         mvd.setMovementType(MovementType.DEPOSIT);
         mvd.setNumTransaction(lastNumTransaction);
-        mvd = MovementServiceUtils.prepareToSave(mvd, movementRepository);
+        mvd = MovementServiceUtils.prepareToSave(mvd);
         movementRepository.save(mvd);
+        
+        if(!mvd.getScheduled())
+        {
+            accountRepository.save(mvd.getAccount());
+        }
     }
 
     private Map<String, String> checkAndValidateDepositData(DepositForm dForm, Account toAccount)

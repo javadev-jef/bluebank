@@ -40,10 +40,10 @@ public class WithdrawService
     @Autowired
     private AccountRepository accountRepository;
 
-    @Transactional
-    public Optional<byte[]> save(WithdrawForm wform, Integer userId) throws InsufficienteBalanceException
+    @Transactional(rollbackOn = Exception.class)
+    public Optional<byte[]> save(WithdrawForm wform, String username) throws InsufficienteBalanceException
     {
-        Account userAccount = accountRepository.findByUser_idAndAccountType(userId, wform.getAccountType()).orElseThrow();
+        Account userAccount = accountRepository.findByUsernameAndAccountType(username, wform.getAccountType()).orElseThrow();
 
         Long lastNumTransaction = movementRepository.findLastNumTransaction();
 
@@ -54,11 +54,17 @@ public class WithdrawService
         mvw.setTempAmount(wform.getAmount());
         mvw.setNumTransaction(lastNumTransaction);
 
-        mvw = MovementServiceUtils.prepareToSave(mvw, movementRepository);
+        mvw = MovementServiceUtils.prepareToSave(mvw);
 
         if(wform.getCashType() == CashType.CASH)
         {
             movementRepository.save(mvw);
+
+            if(!mvw.getScheduled())
+            {
+                accountRepository.save(mvw.getAccount());
+            }
+
             return Optional.empty();
         }
 
@@ -83,6 +89,10 @@ public class WithdrawService
             .block();
             
             movementRepository.save(mvw);
+            if(!mvw.getScheduled())
+            {
+                accountRepository.save(mvw.getAccount());
+            }
 
             return Optional.of(response);
         }

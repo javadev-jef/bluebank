@@ -5,22 +5,23 @@ import java.util.HashMap;
 import java.util.Map;
 
 import br.com.bluebank.application.service.exception.InsufficienteBalanceException;
+import br.com.bluebank.domain.Account.Account;
 import br.com.bluebank.domain.Movement.Movement;
 import br.com.bluebank.domain.Movement.Movement.MovementType;
-import br.com.bluebank.domain.Movement.MovementRepository;
 
 public class MovementServiceUtils
 {
-    public static Movement prepareToSave(Movement mv, MovementRepository mvr) throws InsufficienteBalanceException
+    public static Movement prepareToSave(Movement mv) throws InsufficienteBalanceException
     {
-        String numAccount = mv.getAccount().getNumAccount();
+        Account account = mv.getAccount();
 
-        BigDecimal balanceDB = mvr.findBalanceByNumAccount(numAccount);
+        BigDecimal balanceDB = account.getBalance();
         BigDecimal currentBalance = balanceDB != null ? balanceDB : BigDecimal.ZERO;
 
         mv.setFinalAmount(mv.getTempAmount());
         mv.setBalance(currentBalance);
         mv.setDescription(mv.getDescription() == null ? getDefaultDescription(mv.getMovementType()) : mv.getDescription());
+        account.setBalance(mv.getBalance());
 
         return mv;
     }   

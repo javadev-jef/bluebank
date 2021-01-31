@@ -6,11 +6,12 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 import br.com.bluebank.domain.Account.Account.AccountType;
 import br.com.bluebank.domain.Movement.Movement.MovementType;
 import br.com.bluebank.domain.User.User;
-
+@RepositoryRestResource(exported = false)
 public interface MovementRepository extends PagingAndSortingRepository<Movement, Integer>
 {
     @Query("SELECT SUM(s.finalAmount) FROM Movement AS s WHERE s.account.numAccount = ?1 AND s.scheduled = false")

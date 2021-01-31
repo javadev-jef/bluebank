@@ -73,8 +73,13 @@ public class TransferService
         mvt.setScheduled(whenToDo.isAfter(endOfDay));
         mvt.setAccount(fromAccount);
         mvt.setNumTransaction(lastNumTransaction);
-        mvt = MovementServiceUtils.prepareToSave(mvt, movementRepository);
+        mvt = MovementServiceUtils.prepareToSave(mvt);
         movementRepository.save(mvt);
+
+        if(!mvt.getScheduled())
+        {
+            accountRepository.save(mvt.getAccount());
+        }
 
         // Target account
         mvt = new Movement();
@@ -85,8 +90,13 @@ public class TransferService
         mvt.setScheduled(whenToDo.isAfter(endOfDay));
         mvt.setAccount(toAccount);
         mvt.setNumTransaction(lastNumTransaction);
-        mvt = MovementServiceUtils.prepareToSave(mvt, movementRepository);
+        mvt = MovementServiceUtils.prepareToSave(mvt);
         movementRepository.save(mvt);
+
+        if(!mvt.getScheduled())
+        {
+            accountRepository.save(mvt.getAccount());
+        }
     }
 
     private Map<String, String> checkAndValidateTransferData(TransferForm transfer, Account toAccount) 

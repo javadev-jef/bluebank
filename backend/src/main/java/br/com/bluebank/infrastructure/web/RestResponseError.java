@@ -20,6 +20,15 @@ public class RestResponseError
         return resp;
     }
 
+    public static RestResponseError fromValidationError(Map<String, String> errors, String message)
+    {
+        RestResponseError resp = new RestResponseError();
+        resp.errors = errors;
+        resp.message = message;
+
+        return resp;
+    }
+
     public static RestResponseError fromMessage(String message)
     {
         RestResponseError resp = new RestResponseError();

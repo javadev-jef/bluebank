@@ -9,6 +9,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -75,7 +76,7 @@ public class User implements Serializable
     private String password;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
     private List<Account> accounts = new ArrayList<>();
 
     @Getter
@@ -96,5 +97,11 @@ public class User implements Serializable
     public boolean isNotEmptyPassword()
     {
         return StringUtils.isEmpty(this.password);
+    }
+
+    @JsonIgnore
+    public void encryptPassword()
+    {
+        this.password = StringUtils.encrypt(this.password);
     }
 }

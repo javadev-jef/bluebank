@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.com.bluebank.application.service.BlacklistService;
 import br.com.bluebank.application.service.DepositService;
 import br.com.bluebank.application.service.MovementService;
 import br.com.bluebank.application.service.TransferService;
@@ -45,6 +48,8 @@ import br.com.bluebank.domain.Movement.TransferForm;
 import br.com.bluebank.domain.Movement.WithdrawForm;
 import br.com.bluebank.domain.User.User;
 import br.com.bluebank.infrastructure.web.DefaultResponse;
+import br.com.bluebank.infrastructure.web.security.Utils.JWTConstantsUtils;
+import br.com.bluebank.infrastructure.web.security.Utils.JWTTokenUtils;
 import br.com.bluebank.utils.TransactionUtils;
 
 @CrossOrigin
@@ -70,12 +75,14 @@ public class AppServiceController
     @Autowired
     private WithdrawService withdrawService;
 
+    @Autowired
+    private BlacklistService blacklistService;
+
     @GetMapping(path = "/user/account/{accountType}/balance")
-    public ResponseEntity<Map<String, BigDecimal>> getUserBalance(@PathVariable("accountType") AccountType accountType) 
+    public ResponseEntity<Map<String, BigDecimal>> getAccountBalance(@PathVariable("accountType") AccountType accountType) 
     {
-        // TODO: Only test, must be the logged user
-        Integer userId = 1;
-        String numAccount = accountRepository.obtainNumAccountByParams(userId, accountType);
+        String username = JWTTokenUtils.loggedUsername();
+        String numAccount = accountRepository.obtainNumAccountByParams(username, accountType);
 
         BigDecimal balance = movementService.getUserBalance(numAccount);
 
@@ -85,29 +92,37 @@ public class AppServiceController
         return ResponseEntity.ok(map);
     }
 
+    @GetMapping(path = "/user/account/balance")
+    public ResponseEntity<List<Account>> getAccountBalance() 
+    {
+        String username = JWTTokenUtils.loggedUsername();
+        User user = userService.findByUsername(username);
+
+        return ResponseEntity.ok(user.getAccounts());
+    }
+
     @GetMapping(path = "/default-response")
     public ResponseEntity<DefaultResponse> getDefaultResponse() 
     {
-        // TODO: Only test, must be the logged user
-        Integer userId = 1;
-        List<Account> userAccounts = accountRepository.findByUser_Id(userId);
+        String username = JWTTokenUtils.loggedUsername();
+        List<Account> userAccounts = accountRepository.findByUsername(username);
 
         return ResponseEntity.ok(DefaultResponse.fromData(userAccounts));
     }
 
-    @PostMapping(path = "/statement")
+    @PostMapping(path = "/user/account/statement")
     public ResponseEntity<StatementResponse> getStatement(@Valid @RequestBody StatementFilter stf) 
     {
-        StatementResponse str = movementService.getStatementData(stf);
+        String username = JWTTokenUtils.loggedUsername();
+        StatementResponse str = movementService.getStatementData(stf, username);
         return ResponseEntity.ok(str);
     }
 
-    @PostMapping(path = "user/transfer")
+    @PostMapping(path = "/user/account/transfer")
     public ResponseEntity<TransferForm> transfer(@Valid @RequestBody TransferForm transfer) throws BlueBankException
     {
-        // TODO: Only test, must be the logged user
-        Integer userId = 1;
-        Account userAccount = accountRepository.findByUser_idAndAccountType(userId, transfer.getUserAccountType()).orElseThrow();
+        String username = JWTTokenUtils.loggedUsername();
+        Account userAccount = accountRepository.findByUsernameAndAccountType(username, transfer.getUserAccountType()).orElseThrow();
 
         if(userAccount.getNumAccount().equals(transfer.getNumAccount())) 
         {
@@ -118,7 +133,7 @@ public class AppServiceController
         return ResponseEntity.ok(transfer);
     }
 
-    @PostMapping(path = "/user/withdraw", produces = MediaType.IMAGE_PNG_VALUE)
+    @PostMapping(path = "/user/account/withdraw", produces = MediaType.IMAGE_PNG_VALUE)
     public ResponseEntity<byte[]> withdraw(@Valid @RequestBody WithdrawForm wForm) throws BlueBankException
     {
         try 
@@ -130,9 +145,8 @@ public class AppServiceController
 			throw new WithdrawException(e.getErrors(), e.getMessage());
 		}
 
-        // TODO: Only test, must be the logged user
-        Integer userId = 1;
-        Optional<byte[]> response = withdrawService.save(wForm, userId);
+        String username = JWTTokenUtils.loggedUsername();
+        Optional<byte[]> response = withdrawService.save(wForm, username);
 
         return response.isPresent() ? ResponseEntity.ok(response.get()) : ResponseEntity.ok().build();
     }
@@ -160,26 +174,32 @@ public class AppServiceController
     @GetMapping(path = "/user/profile")
     public ResponseEntity<User> profile()
     {
-        // TODO: Only test, must be the logged user
-        Integer userId = 1;
-        User user = userService.findById(userId);
+        String username = JWTTokenUtils.loggedUsername();
+        User user = userService.findByUsername(username);
 
         return ResponseEntity.ok(user);
     }
 
     @PutMapping(path = "/user/profile/update")
-    public void updateProfile(@Valid @RequestBody User user) throws ValidationException
+    public void updateProfile(@Valid @RequestBody User newUser) throws ValidationException
     {
-        // TODO: Only test, must be the logged user
-        Integer userId = 1;
-        user.setId(userId);
-        user = userService.update(user);
+        String username = JWTTokenUtils.loggedUsername();
+        newUser = userService.update(newUser, username);
     }
 
     @PostMapping(path = "/user/register")
     @ResponseStatus(value = HttpStatus.CREATED)
-    public void registerUser(@Valid @RequestBody User user) throws ValidationException
+    public void registerUser(@Valid @RequestBody User newUser) throws ValidationException
     {
-        userService.save(user);
+        userService.save(newUser);
+    }
+
+    @DeleteMapping(value = "/user/logout")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    public void logout(HttpServletRequest request)
+    {
+        String token = request.getHeader(JWTConstantsUtils.AUTH_HEADER);
+
+        blacklistService.save(token);
     }
 }

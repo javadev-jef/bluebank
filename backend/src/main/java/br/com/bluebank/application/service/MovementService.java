@@ -29,9 +29,9 @@ public class MovementService
         return movementRepository.findBalanceByNumAccount(numAccount);
     }
 
-    public StatementResponse getStatementData(StatementFilter stf) 
+    public StatementResponse getStatementData(StatementFilter stf, String username) 
     {
-        Account accountUser = accountRepository.findByUser_idAndAccountType(1, stf.getAccountType()).orElseThrow();
+        Account accountUser = accountRepository.findByUsernameAndAccountType(username, stf.getAccountType()).orElseThrow();
         List<Movement> mvts = movementRepository.findAllByStatementFilter(accountUser.getAccountType(), accountUser.getUser(), stf.getInitialDate(), stf.getFinalDate());
 
         BigDecimal t = mvts.stream().map(x -> x.getFinalAmount()).reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -46,8 +46,13 @@ public class MovementService
             mv.setNumTransaction(lastNumTransaction);
         }
         
-        mv = MovementServiceUtils.prepareToSave(mv, movementRepository);
-        mv = movementRepository.save(mv);
+        mv = MovementServiceUtils.prepareToSave(mv);
+        movementRepository.save(mv);
+
+        if(!mv.getScheduled())
+        {
+            accountRepository.save(mv.getAccount());
+        }
 
         return mv;
     }
