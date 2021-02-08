@@ -8,6 +8,7 @@ import java.util.Map;
 import br.com.bluebank.domain.Account.Account;
 import br.com.bluebank.domain.Account.Account.AccountType;
 import br.com.bluebank.domain.User.User.PersonType;
+import br.com.bluebank.domain.User.UserLogon.LogonType;
 import br.com.bluebank.utils.CashType;
 import lombok.Getter;
 
@@ -18,23 +19,26 @@ public class DefaultResponse
     private List<Map<String, String>> accountTypes = new ArrayList<>();
     private List<Map<String, String>> personTypes = new ArrayList<>();
     private List<Map<String, String>> cashTypes = new ArrayList<>();
+    private List<Map<String, String>> logonTypes = new ArrayList<>();
 
     private DefaultResponse(){}
 
     /**
-     * User must be logged
      * Return a DefaultResponse with:
-     * AccountTypes, PersonTypes, CashTypes and custom map of user accounts
+     * User account list (only logged) AccountTypes, PersonTypes, CashTypes, and LogonTypes
      */
     public static DefaultResponse fromData(List<Account> userAccounts)
     {
         DefaultResponse resp = new DefaultResponse();
 
-        for(int i=0; i<userAccounts.size(); i++)
+        if(userAccounts != null)
         {
-            Account account = userAccounts.get(i);
+            for(int i=0; i<userAccounts.size(); i++)
+            {
+                Account account = userAccounts.get(i);
 
-            resp.userAccounts.put(account.getAccountType().name(), account.getNumAccount());
+                resp.userAccounts.put(account.getAccountType().name(), account.getNumAccount());
+            }
         }
 
         Map<String, String> account;
@@ -71,6 +75,18 @@ public class DefaultResponse
             cTypes.put("displayName", cashTypes[i].getDisplayName());
 
             resp.cashTypes.add(i, cTypes);
+        }
+
+        Map<String, String> lTypes;
+        LogonType[] logonTypes = LogonType.values();
+        
+        for(int i=0; i<logonTypes.length; i++)
+        {
+            lTypes = new LinkedHashMap<>();
+            lTypes.put("type", logonTypes[i].name());
+            lTypes.put("displayName", logonTypes[i].getDisplayName());
+
+            resp.logonTypes.add(i, lTypes);
         }
 
         return resp;

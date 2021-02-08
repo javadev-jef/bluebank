@@ -1,21 +1,19 @@
-import React, { useState, useEffect, useCallback } from "react";
-
-import { Grid } from "@material-ui/core";
+import React, { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import Select from "../../../components/Select"; 
+import Button from "../../../components/Button";
 import DatePicker from "../../../components/DatePicker";
-
-import { getInitialDateOfMonth, getFinalDateOfMonth } from "../../../utils/functionUtils";
+import Select from "../../../components/Select";
 import { statementForm } from "../../../constants/formSchema";
+import { getFinalDateOfMonth, getInitialDateOfMonth } from "../../../utils/functionUtils";
 
-const Form = ({onSuccess = () => {}, onError = () => {}, loading, serverComponents, onChangeAccount = () =>{}}) =>
+const Form = ({onSuccess = () => {}, onError = () => {}, loading, serverComponents, fieldErrors, onChangeAccount = () =>{}}) =>
 {
     const [initialDateTemp, setInitialDateTemp] = useState(getInitialDateOfMonth());
     const [finalDateTemp, setFinalDateTemp] = useState(getFinalDateOfMonth());
 
     const {accountTypes, userAccounts} = serverComponents;
     
-    const {register, handleSubmit, errors, clearErrors, getValues} = useForm(
+    const {register, handleSubmit, errors, setError, clearErrors, getValues} = useForm(
     {
         resolver: statementForm(initialDateTemp, finalDateTemp), 
         reValidateMode: "onSubmit",
@@ -37,69 +35,78 @@ const Form = ({onSuccess = () => {}, onError = () => {}, loading, serverComponen
     },
     [accountTypes, getValues, onAccountSelected]);
 
+    // SET MANUAL ERRORS TO REACT-HOOK-FORM
+    useEffect(()=>
+    {
+        for(const error in fieldErrors)
+        {
+            setError(error, {message: fieldErrors[error]});
+        }
+    }, 
+    [fieldErrors, setError]);
+
     useEffect(()=>
     {
         onError(errors);
     }, 
     [errors, onError]);
 
+    // FETCH STATEMENTS ONLOAD
+    useEffect(()=>
+    {
+        if(accountTypes)
+        {
+            handleSubmit(onSuccess)();
+        }
+    },
+    [handleSubmit, onSuccess, accountTypes]);
+
     return(
         <fieldset>
             <legend>Dados de Busca</legend>
             <form action="GET" onSubmit={handleSubmit(onSuccess)} autoComplete={"off"}>
-                <Grid container spacing={1}>
+                <div style={{display:'flex'}}>
+                    <Select 
+                        name="accountType"
+                        data={accountTypes}
+                        refForm={register}
+                        valueName="type"
+                        labelName="displayName"
+                        title={errors.accountType?.message}
+                        className={errors.accountType && "input-error"}
+                        onChange={e => onAccountSelected(e.target.value)}
+                        style={{minWidth: 180, maxWidth: 180}}
+                    />
 
-                    <Grid item xs={2}>
-                        <Select 
-                            name="accountType"
-                            data={accountTypes}
-                            refForm={register}
-                            valueName="type"
-                            labelName="displayName"
-                            title={errors.accountType?.message}
-                            className={errors.accountType && "input-error"}
-                            onChange={e => onAccountSelected(e.target.value)}
-                        />
-                    </Grid>
+                    <DatePicker 
+                        placeholder="Data Inicial"
+                        refForm={register}
+                        name="initialDate"
+                        value={initialDateTemp}
+                        onChange={setInitialDateTemp}
+                        title={errors.initialDate?.message}
+                        className={errors.initialDate && "input-error"}
+                        style={{maxWidth: 186}}
+                    />
 
-                    <Grid item xs={3}>
-                        <DatePicker 
-                            placeholder="Data Inicial"
-                            refForm={register}
-                            name="initialDate"
-                            value={initialDateTemp}
-                            onChange={setInitialDateTemp}
-                            title={errors.initialDate?.message}
-                            className={errors.initialDate && "input-error"}
-                        />
-                    </Grid>
+                    <DatePicker 
+                        placeholder="Data Final"
+                        refForm={register}
+                        name="finalDate"
+                        value={finalDateTemp}
+                        onChange={setFinalDateTemp}
+                        title={errors.finalDate?.message}
+                        className={errors.finalDate && "input-error"}
+                        style={{maxWidth: 186}}
+                    />
 
-                    <Grid item xs={3}>
-                        <DatePicker 
-                            placeholder="Data Final"
-                            refForm={register}
-                            name="finalDate"
-                            value={finalDateTemp}
-                            onChange={setFinalDateTemp}
-                            title={errors.finalDate?.message}
-                            className={errors.finalDate && "input-error"}
-                        />
-                    </Grid>
-
-                    <Grid item xs={4}>
-                        <button 
-                            type="submit"
-                            className="button" 
-                            disabled={loading}
-                            style={{width: 120}}
-                            onClick={() => clearErrors()}
-                        >
-                            <span>Buscar</span>
-                        </button>
-                    </Grid>
-                    
-                </Grid>
-                
+                    <Button 
+                        value="Buscar"
+                        loading={loading}
+                        onClick={() => clearErrors()}
+                        style={{width: 120}}
+                    />
+                </div>
             </form>
         </fieldset>
     );

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import { useState, useCallback } from "react";
 
 import Navbar from "../../components/Navbar";
@@ -17,18 +17,22 @@ import axios from "axios";
 import {serialize} from "object-to-formdata";
 import Logo from "../../components/Logo";
 import { useDefaultResponseServer } from "../../hooks/useDefaultResponseServer";
+import { AuthContext } from "../../hooks/useAuth";
+import { useHandleResponseError, DisconnectType } from "../../hooks/useHandleResponseError";
 
 const Deposit = () =>
 {
     const [logged, setLogged] = useState(false);
-    const [alertProps, setAlertProps] = useState({open: false});
+    const [alertMessage, setAlertMessage] = useState({open: false});
     const [loading, setLoading] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
     const [data, setData] = useState([]);
     const reciboRef = useRef();
     const [clearForm, setClearForm] = useState(false);
-    const [errors, setErrors] = useState([]);
-    const {serverComponents} = useDefaultResponseServer(setAlertProps);
+    const [inputErrors, setInputErrors] = useState([]);
+    const {serverComponents} = useDefaultResponseServer(setAlertMessage);
+    const {credentials} = useContext(AuthContext);
+    const {getResponseHandled} = useHandleResponseError();
 
     const handlePrint = useReactToPrint
     ({
@@ -44,33 +48,22 @@ const Deposit = () =>
         try
         {
             setLoading(true);
-            const response = await axios.post(`${API_ENDPOINT}/user/account/deposit`, formData, {
+            const {data} = await axios.post(`${API_ENDPOINT}/user/account/deposit`, formData, {
                 headers: {"Content-Type": "multipart/form-data"}
             });
             
-            setData(response.data);
+            setData(data);
 
-            setAlertProps({type: "success", message: "Deposito realizado com sucesso.", open: true});
+            setAlertMessage({type: "success", value: "Deposito realizado com sucesso.", open: true});
             setClearForm(true); setOpenDialog(true);
         }
         catch(error)
         {
-            const response = error.response;
-            const data = response && response.data;
-            const errors = response && data.errors;
-            const message = response && data.message;
-
-            if(response && errors && response.status === 400)
+            if(!axios.isCancel(error))
             {
-                setErrors(errors);
-                setAlertProps({type: "error", message: "Ops! Os dados não foram preenchidos corretamente.", open: true});
-            }
-            else if(response && message)
-            {
-                setAlertProps({type: "error", message: message, open: true});
-            }
-            else{
-                setAlertProps({type: "error", message: "Falha na tentativa de conexão com servidor.", open: true});
+                const {alertError, fieldErrors} = getResponseHandled(error, DisconnectType.ONLY_DISCONNECT);
+                setAlertMessage(alertError);
+                setInputErrors(fieldErrors);
             }
         }
         finally
@@ -84,14 +77,15 @@ const Deposit = () =>
     {
         if(Object.entries(errors).length > 0)
         {
-            setAlertProps({type: "error", message: "Todos os campos em destaque são obrigatórios.", open: true});
+            setAlertMessage({type: "error", value: "Todos os campos em destaque são obrigatórios.", open: true});
         }
     }, []);
 
     useEffect(()=>
     {
-        setLogged(true);
-    },[])
+        setLogged(!!credentials.token);
+    },
+    [credentials.token])
 
     return(
         <div className="deposit-container" style={!logged ? {display: "flex"} : {}}>
@@ -121,7 +115,7 @@ const Deposit = () =>
                     isUserLogged={logged}
                     onError={onFormError}
                     onSuccess={onFormSuccess}
-                    errorServer={errors}
+                    fieldErrors={inputErrors}
                     serverComponents={serverComponents}
                     clearForm={clearForm}
                 />
@@ -144,12 +138,12 @@ const Deposit = () =>
 
             <AlertMessage 
                 maxWidth={450} 
-                open={alertProps.open}
+                open={alertMessage.open}
                 autoHideDuration={8000} 
-                severity={alertProps.type}
-                message={alertProps.message}
+                severity={alertMessage.type}
+                message={alertMessage.value}
                 anchorOrigin={{vertical: "bottom", horizontal: "left"}}
-                onClose={() => setAlertProps({...alertProps, open: false})}
+                onClose={() => setAlertMessage({...alertMessage, open: false})}
             />
 
         </div>

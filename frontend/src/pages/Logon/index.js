@@ -1,60 +1,79 @@
-import React, { useState } from "react";
-
-import "./style.scss";
-
-import { Grid } from "@material-ui/core";
+import React, { useContext, useEffect, useState } from "react";
+import { Redirect } from "react-router-dom";
 import cofrinhoImg from "../../assets/cofrinho.svg";
-import {FiLogIn} from "react-icons/fi";
-import {Link} from "react-router-dom";
+import AlertMessage from "../../components/AlertMessage";
 import Logo from "../../components/Logo";
+import { routes } from "../../constants/paths.json";
+import { AuthContext } from "../../hooks/useAuth";
+import { useDefaultResponseServer } from "../../hooks/useDefaultResponseServer";
+import Form from "./Form";
+import "./style.scss";
 
 export default function Logon()
 {
-    const options = [
-        {value: "Conta", placeholder: "99999"},
-        {value: "CPF", placeholder: "999.999.999-99"}
-    ];
+    const auth = useContext(AuthContext);
+    const [alert, setAlert] = useState({});
+    const {clearCredentials, clearStates} = auth;
+    const {serverComponents} = useDefaultResponseServer(setAlert);
 
-    const [optionLogon, setOptionLogon] = useState(options[0]);
-
-    function handleOptionLogon(event)
+    const onSuccessForm = (data) =>
     {
-        const optionSelected = options.filter(opt => {return opt.value === event.target.value});
-        setOptionLogon(optionSelected[0]);
+        auth.requestLogin(data);
+    }
+
+    useEffect(() =>
+    {
+        return () => clearStates();
+    }, 
+    [clearStates])
+
+    useEffect(() => 
+    {
+        setAlert(auth.alertMessage);
+    },
+    [auth.alertMessage]);
+
+    useEffect(() =>
+    {
+        clearCredentials();
+        const lastSessionExpired = sessionStorage.getItem("expiredSession");
+
+        if(lastSessionExpired != null)
+        {
+            setAlert(JSON.parse(lastSessionExpired));
+            sessionStorage.removeItem("expiredSession");
+        }
+    }, 
+    [clearCredentials]);
+
+    if(auth.isAuthenticated() && !auth.isTokenExpired())
+    {
+        return <Redirect to={{pathname: routes.home, state: {backPage: routes.logon}}}/>
     }
 
     return(
         <div className="logon-container">
             <section className="form">
                 <Logo toPage="#"/>
-                <form>
-                    <h1>
-                        <span className="part-01">Olá,</span>
-                        <span className="part-02">seja bem-vindo!</span>
-                    </h1>
-                    <Grid container spacing={1}>
-                        <Grid item xs={6}>
-                            <select name="option-logon" onChange={handleOptionLogon}>
-                                {options.map(opt => 
-                                    <option key={opt.value} value={opt.value}>{opt.value}</option>
-                                )}
-                            </select>
-                        </Grid>
-                        <Grid item xs={6}>
-                            <input placeholder={optionLogon.placeholder}/>
-                        </Grid>
-                        <Grid item xs={12}>
-                            <input type="password" placeholder="Senha"/>
-                        </Grid>
-                    </Grid>
-
-                    <input className="button" type="submit" value="Acessar"/>
-
-                    <Link to="/register"><FiLogIn /> Quero abrir uma conta</Link>
-                </form>
+                <Form 
+                    onSuccess={onSuccessForm}
+                    loadingData={auth.processing}
+                    fieldErrors={auth.fieldErrors}
+                    serverComponents={serverComponents}
+                />
             </section>
 
             <img className="logon-image" src={cofrinhoImg} alt="Blue Bank"/>
+
+            <AlertMessage 
+                maxWidth={450} 
+                open={alert.open}
+                autoHideDuration={6000} 
+                severity={alert.type}
+                message={alert.value}
+                anchorOrigin={{vertical: "bottom", horizontal: "right"}}
+                onClose={() => setAlert({...alert, open:false})}
+            />
         </div>
     );
 }

@@ -1,11 +1,6 @@
 // Imports
 @import "../../variables";
 
-body
-{
-    overflow: hidden;
-}
-
 div.logon-container
 {
     width: 100%;
@@ -43,12 +38,17 @@ div.logon-container
             a{
                 display: inline-flex;
                 align-items: center;
-                margin-top: 40px;
                 color:#41414d;
                 font-weight: 600;
                 text-decoration: underline transparent;
                 font-size: 18px;
                 transition: all ease-in-out 500ms;
+                margin-top: 10px;
+
+                &:first-of-type
+                {
+                    margin-top: 40px;
+                }
 
                 svg
                 {
@@ -67,15 +67,20 @@ div.logon-container
 }
 
 // Media Screen
-@media screen and (max-width: 1120px)
+@media screen and (max-width: 1220px)
 {
     div.logon-container
     {
-        padding:0 24px;
+        padding:0 48px;
+
+        img.logon-image
+        {
+            width: 50%;
+        }
     }
 }
 
-@media screen and (max-width: 800px)
+@media screen and (max-width: 870px)
 {
     
     div.logon-container 

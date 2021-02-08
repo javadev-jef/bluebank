@@ -1,6 +1,6 @@
 import React from "react";
 
-const ItemConta = ({label, numConta, valueConta, show}) =>
+const AccountItem = ({label, numConta, valueConta, show}) =>
 {
     return(
         <div className="card c-conta">
@@ -10,4 +10,4 @@ const ItemConta = ({label, numConta, valueConta, show}) =>
     );
 }
 
-export default ItemConta;
+export default AccountItem;

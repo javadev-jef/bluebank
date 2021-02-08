@@ -27,8 +27,17 @@ public class UserLogon implements Serializable
     @NotNull(message = "Nenhuma opção de login foi selecionada")
     private LogonType logonType;
 
+    @Getter
     public enum LogonType 
     {
-        NUM_ACCOUNT, CPF_CNPJ;
+        NUM_ACCOUNT("Conta"), 
+        CPF_CNPJ("CPF/CNPJ");
+
+        public String displayName;
+
+        LogonType(String displayName)
+        {
+            this.displayName = displayName;
+        }
     }
 }

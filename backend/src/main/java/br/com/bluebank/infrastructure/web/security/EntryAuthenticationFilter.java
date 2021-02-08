@@ -42,7 +42,11 @@ public class EntryAuthenticationFilter extends OncePerRequestFilter
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException 
     {
         String path = request.getServletPath();
-        return path.startsWith("/api/user/register");
+        
+        return path.equals("/api/user/register") 
+            || path.equals("/api/server/default-response/public")
+            || path.equals("/api/user/account/deposit")
+            || path.startsWith("/api/account/fetchFavoredName/");
     }
 
 	@Override

@@ -9,13 +9,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import br.com.bluebank.application.service.exception.InsufficienteBalanceException;
 import br.com.bluebank.application.service.exception.NoAccountFoundException;
 import br.com.bluebank.application.service.exception.ValidationException;
 import br.com.bluebank.domain.Account.Account;
 import br.com.bluebank.domain.Account.Account.AccountType;
+import br.com.bluebank.domain.Movement.Movement;
 import br.com.bluebank.domain.Account.AccountRepository;
 import br.com.bluebank.domain.User.User;
 import br.com.bluebank.domain.User.UserRepository;
+import br.com.bluebank.utils.MovementServiceUtils;
 import br.com.bluebank.utils.StringUtils;
 
 @Service
@@ -26,8 +29,11 @@ public class UserService
 
     @Autowired
     private AccountRepository accountRepository;
+    
+    @Autowired
+    private MovementService movementService;
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public User save(User user) throws ValidationException
     {
         Map<String, String> errors = checkAndValidateUserAttributes(user);
@@ -51,7 +57,17 @@ public class UserService
             account.setAccountType(AccountType.values()[i]);
             account.setUser(user);
             account.setBalance(BigDecimal.ZERO);
-            accountRepository.save(account);
+            account = accountRepository.save(account);
+            
+            try
+            {
+                Movement movement = MovementServiceUtils.generateInitialMovement(account);
+                movementService.save(movement);
+            }
+            catch(InsufficienteBalanceException ex)
+            {
+                throw new RuntimeException();
+            }
         }
 
        return user;
@@ -98,6 +114,9 @@ public class UserService
         if(StringUtils.isEmpty(newUser.getPassword()))
         {
             newUser.setPassword(currentUser.getPassword());
+        }
+        else{
+            newUser.encryptPassword();
         }
 
         Map<String, String> errors = checkAndValidateUserAttributes(newUser);

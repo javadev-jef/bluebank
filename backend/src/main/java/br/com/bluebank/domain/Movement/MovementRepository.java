@@ -26,7 +26,7 @@ public interface MovementRepository extends PagingAndSortingRepository<Movement,
     @Query("SELECT m FROM Movement AS m WHERE m.scheduled = true AND CAST(m.date AS LocalDate) < ?1")
     public List<Movement> findAllFailedMovementScheduledByDate(LocalDate date);
 
-    @Query("SELECT m FROM Movement AS m WHERE m.account.accountType = ?1 AND m.scheduled = false AND m.account.user = ?2 AND CAST(m.date AS LocalDate) BETWEEN ?3 AND ?4 ORDER BY m.date DESC")
+    @Query("SELECT m FROM Movement AS m WHERE m.account.accountType = ?1 AND m.scheduled = false AND m.account.user = ?2 AND CAST(m.date AS LocalDate) BETWEEN ?3 AND ?4 ORDER BY m.id DESC")
     public List<Movement> findAllByStatementFilter(AccountType accountType, User user, LocalDate initialDate, LocalDate finalDate);
 
     @Query("SELECT MAX(m.numTransaction) FROM Movement AS m")

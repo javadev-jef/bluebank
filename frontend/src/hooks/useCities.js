@@ -18,7 +18,7 @@ export const useCities = () =>
         catch(error)
         {
             console.log(error);
-            setCities([{id: -1, nome: "Falha ao carregar os dados"}])
+            setCities([{id: -1, nome: "Falha ao carregar os dados do IBGE"}])
         }
     }, [])
 

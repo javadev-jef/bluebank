@@ -1,22 +1,22 @@
-import React, { useEffect, useState } from "react";
-
-import { Grid, CircularProgress, Backdrop } from "@material-ui/core";
-import Input from "../../../components/Input";
-import DatePicker from "../../../components/DatePicker";
-import Select from "../../../components/Select";
-
-import { useForm } from "react-hook-form";
-import { useStates } from "../../../hooks/useStates";
-import { useCities } from "../../../hooks/useCities";
-import { registerForm } from "../../../constants/formSchema";
-
-import { getAgeOfMajority } from "../../../utils/functionUtils";
-import { API_ENDPOINT, DATE_FORMAT } from "../../../constants/constants";
-
+import { Backdrop, CircularProgress, Grid } from "@material-ui/core";
 import axios from "axios";
 import moment from "moment";
+import React, { useContext, useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import Button from "../../../components/Button";
+import DatePicker from "../../../components/DatePicker";
+import Input from "../../../components/Input";
+import InputNumberFormat from "../../../components/InputNumberFormat";
+import Select from "../../../components/Select";
+import { API_ENDPOINT, CNPJ_MASK, CPF_MASK, DATE_FORMAT } from "../../../constants/constants";
+import { registerForm } from "../../../constants/formSchema";
+import { AuthContext } from "../../../hooks/useAuth";
+import { useCities } from "../../../hooks/useCities";
+import { useHandleResponseError } from "../../../hooks/useHandleResponseError";
+import { useStates } from "../../../hooks/useStates";
+import { getAgeOfMajority } from "../../../utils/functionUtils";
 
-const Form = ({onError = ()=>{}, onSuccess = ()=>{}, loadingData, serverComponents, errorServer}) =>
+const Form = ({onError = ()=>{}, onSuccess = ()=>{}, loadingData, serverComponents, fieldErrors, callAlert}) =>
 {
     const {cities, cityList} = useCities();
     const {states} = useStates();
@@ -26,8 +26,14 @@ const Form = ({onError = ()=>{}, onSuccess = ()=>{}, loadingData, serverComponen
     const [userData, setUserData] = useState({}); 
     const [errorProfile, setErrorProfile] = useState(false);
     const [initialized, setInitialized] = useState(false);
+    const {buildAuthHeader} = useContext(AuthContext);
+    const {getResponseHandled} = useHandleResponseError();
 
-    const {register, watch, handleSubmit, setError, errors, clearErrors, reset} = useForm({resolver: registerForm()});
+    const {
+        register, watch, handleSubmit, 
+        setError, control, 
+        errors, clearErrors, reset
+    } = useForm({resolver: registerForm()});
 
     const onChangeState = (stateId) =>
     {
@@ -37,12 +43,12 @@ const Form = ({onError = ()=>{}, onSuccess = ()=>{}, loadingData, serverComponen
     // SET MANUAL ERRORS TO REACT-HOOK-FORM
     useEffect(()=>
     {
-        for(const error in errorServer)
+        for(const error in fieldErrors)
         {
-            setError(error, {message: errorServer[error]});
+            setError(error, {message: fieldErrors[error]});
         }
     }, 
-    [errorServer, setError]);
+    [fieldErrors, setError]);
 
     //EXECUTES WHEN USER-DATA IS LOADED
     useEffect(()=>
@@ -50,7 +56,9 @@ const Form = ({onError = ()=>{}, onSuccess = ()=>{}, loadingData, serverComponen
         // LOADS INITIAL FORM DATA
         if(userData.id !== undefined)
         {
-            reset({...userData, cityId: undefined, birthDate: null});
+            reset({...userData, cityId: undefined, birthDate: undefined});
+            const birthDate = moment(userData.birthDate, true, DATE_FORMAT);
+            setBirthDateTemp(birthDate);
             cityList(userData.stateId);
         }
     }, 
@@ -61,9 +69,7 @@ const Form = ({onError = ()=>{}, onSuccess = ()=>{}, loadingData, serverComponen
         // UPDATES INITIAL FORM DATA WITH CITY
         if(cities.length > 0 && cities[0].id !== 0 && !initialized)
         {
-            const birthDate = moment(userData.birthDate, true, DATE_FORMAT);
-            reset({...userData, birthDate: birthDate});
-            setBirthDateTemp(birthDate);
+            reset({...userData, birthDate: undefined});
             setInitialized(true);
         }
     },
@@ -77,9 +83,7 @@ const Form = ({onError = ()=>{}, onSuccess = ()=>{}, loadingData, serverComponen
         {
             try
             {
-                const response = await axios.get(`${API_ENDPOINT}/user/profile`, {cancelToken: source.token});
-                const data = response.data;
-
+                const {data} = await axios.get(`${API_ENDPOINT}/user/profile`, {...buildAuthHeader(), cancelToken: source.token});
                 setUserData({...data, hasData: true});
             }
             catch(error)
@@ -87,7 +91,9 @@ const Form = ({onError = ()=>{}, onSuccess = ()=>{}, loadingData, serverComponen
                 if(!axios.isCancel(error))
                 {
                     setErrorProfile(true);
-                    console.log(error);
+
+                    const {alertError} = getResponseHandled(error);
+                    callAlert(alertError);
                 }
             }
         };
@@ -95,7 +101,7 @@ const Form = ({onError = ()=>{}, onSuccess = ()=>{}, loadingData, serverComponen
         
         return () => source.cancel();
     },
-    [states]);
+    [states, getResponseHandled, buildAuthHeader, callAlert]);
 
     useEffect(() => 
     {
@@ -147,10 +153,11 @@ const Form = ({onError = ()=>{}, onSuccess = ()=>{}, loadingData, serverComponen
                 </Grid>
 
                 <Grid item xs={6}>
-                    <Input 
+                    <InputNumberFormat
+                        useFormControl={control}
+                        name="cpfCnpj"
                         placeholder={watch("personType") ? watch("personType") : "CPF/CNPJ"}
-                        name="cpfCnpj"   
-                        refForm={register} 
+                        format={watch("personType") === "CPF" ? CPF_MASK : CNPJ_MASK}
                         title={errors.cpfCnpj?.message}
                         className={errors.cpfCnpj && "input-error"}
                         disabled={!userData.hasData}
@@ -159,10 +166,10 @@ const Form = ({onError = ()=>{}, onSuccess = ()=>{}, loadingData, serverComponen
 
                 <Grid item xs={6}>
                     <DatePicker 
-                        placeholder="Nascimento"  
+                        placeholder={watch("personType") === "CNPJ" ? "Fundação" : "Nascimento"}   
                         name="birthDate"
                         refForm={register} 
-                        maxDate={getAgeOfMajority(new Date())}
+                        maxDate={getAgeOfMajority(new Date(), watch("personType"))}
                         value={birthDateTemp}
                         onChange={setBirthDateTemp}
                         title={errors.birthDate?.message}
@@ -237,14 +244,11 @@ const Form = ({onError = ()=>{}, onSuccess = ()=>{}, loadingData, serverComponen
                 </Grid>
                 
             </Grid>
-            <button 
-                type="submit"
-                className="button" 
-                onClick={() => clearErrors()} 
-                disabled={loadingData || !userData.hasData} 
-            >
-                {loadingData ? <CircularProgress style={{color: "#FFF"}}/> : "Realizar Alterações"}
-            </button>
+            <Button
+                value="Realizar Alterações"
+                loading={loadingData || !userData.hasData}
+                onClick={() => clearErrors()}
+            />
         </form>
     );
 }

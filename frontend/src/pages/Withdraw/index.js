@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useContext, useState } from "react";
 
 import Navbar from "../../components/Navbar";
 
@@ -14,6 +14,8 @@ import { API_ENDPOINT } from "../../constants/constants";
 
 import axios from "axios";
 import { useDefaultResponseServer } from "../../hooks/useDefaultResponseServer";
+import { AuthContext } from "../../hooks/useAuth";
+import { useHandleResponseError } from "../../hooks/useHandleResponseError";
 
 
 const Withdraw = () =>
@@ -24,41 +26,32 @@ const Withdraw = () =>
     const [loading, setLoading] = useState(false);
     const [clearForm, setClearForm] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
-    const [alertProps, setAlertProps] = useState({open: false});
-    const {serverComponents} = useDefaultResponseServer(setAlertProps);
+    const [alertMessage, setAlertMessage] = useState({open: false});
+    const {serverComponents} = useDefaultResponseServer(setAlertMessage);
+    const {buildAuthHeader} = useContext(AuthContext);
+    const {getResponseHandled} = useHandleResponseError();
 
     const onSuccessForm = async (data) =>
     {
         try
         {
             setLoading(true);
-            const response = await axios.post(`${API_ENDPOINT}/user/withdraw`, data, {responseType: 'arraybuffer'});
+            const response = await axios.post(`${API_ENDPOINT}/user/account/withdraw`, data, {...buildAuthHeader(), responseType: 'arraybuffer'});
             
             setData(data);
             setQrCode(new Buffer(response.data, "binary").toString("base64"));
 
-            setAlertProps({type: "success", message: "Saque realizado com sucesso.", open: true});
+            setAlertMessage({type: "success", value: "Saque realizado com sucesso.", open: true});
             setClearForm(true); setOpenDialog(true);
         }
         catch(error)
         {
             const response = error.response;
-            const data = response && JSON.parse(Buffer.from(response.data).toString('utf8'));
-            const errors = response && data.errors;
-            const message = response && data.message;
-
-            if(response && errors && response.status === 400)
-            {
-                setErrors(errors);
-                setAlertProps({type: "error", message: "Ops! Os dados não foram preenchidos corretamente.", open: true});
-            }
-            else if(response && message)
-            {
-                setAlertProps({type: "error", message: message, open: true});
-            }
-            else{
-                setAlertProps({type: "error", message: "Falha na tentativa de conexão com servidor.", open: true});
-            }
+            error.response.data =  JSON.parse(Buffer.from(response.data).toString('utf8'));
+            
+            const {alertError, fieldErrors} = getResponseHandled(error);
+            setAlertMessage(alertError);
+            setErrors(fieldErrors);
         }
         finally
         {
@@ -71,7 +64,7 @@ const Withdraw = () =>
     {
         if(Object.entries(errors).length > 0)
         {
-            setAlertProps({type: "error", message: "Todos os campos em destaque são obrigatórios.", open: true});
+            setAlertMessage({type: "error", value: "Todos os campos em destaque são obrigatórios.", open: true});
         }
     },[]);
 
@@ -88,14 +81,14 @@ const Withdraw = () =>
                         <li>Informe o valor do saque, insira sua senha.</li>
                         <li>Verifique todos os dados, e clique em realizar saque.</li>
                     </ol>
-                    <img src={saqueImg} alt="Transfer Money"/>
+                    <img src={saqueImg} alt="Withdraw"/>
                 </section>
 
-                <Form 
+                <Form
                     onSuccess={onSuccessForm} 
                     onError={onErrorForm}
                     loadingData={loading}
-                    errorServer={errors}
+                    fieldErrors={errors}
                     serverComponents={serverComponents}
                     clearForm={clearForm}
                 />
@@ -115,12 +108,12 @@ const Withdraw = () =>
             
             <AlertMessage 
                 maxWidth={450} 
-                open={alertProps.open}
+                open={alertMessage.open}
                 autoHideDuration={8000} 
-                severity={alertProps.type}
-                message={alertProps.message}
+                severity={alertMessage.type}
+                message={alertMessage.value}
                 anchorOrigin={{vertical: "bottom", horizontal: "left"}}
-                onClose={() => setAlertProps({...alertProps, open: false})}
+                onClose={() => setAlertMessage({...alertMessage, open: false})}
             />
         </div>
     );

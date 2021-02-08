@@ -101,13 +101,22 @@ public class AppServiceController
         return ResponseEntity.ok(user.getAccounts());
     }
 
-    @GetMapping(path = "/default-response")
-    public ResponseEntity<DefaultResponse> getDefaultResponse() 
+    @GetMapping(path = "/server/default-response/{accessType}")
+    public ResponseEntity<DefaultResponse> getDefaultResponse(@PathVariable("accessType") String accessType) 
     {
-        String username = JWTTokenUtils.loggedUsername();
-        List<Account> userAccounts = accountRepository.findByUsername(username);
+        if(accessType.equals("private"))
+        {
+            String username = JWTTokenUtils.loggedUsername();
+            List<Account> userAccounts = accountRepository.findByUsername(username);
 
-        return ResponseEntity.ok(DefaultResponse.fromData(userAccounts));
+            return ResponseEntity.ok(DefaultResponse.fromData(userAccounts));
+        }
+        else if(accessType.equals("public"))
+        {
+            return ResponseEntity.ok(DefaultResponse.fromData(null));
+        }
+
+        return ResponseEntity.notFound().build();
     }
 
     @PostMapping(path = "/user/account/statement")
@@ -201,5 +210,12 @@ public class AppServiceController
         String token = request.getHeader(JWTConstantsUtils.AUTH_HEADER);
 
         blacklistService.save(token);
+    }
+
+    @GetMapping(value = "/account/fetchFavoredName/{numAccount}")
+    public ResponseEntity<String> fetchFavoredName(@PathVariable("numAccount") String numAccount)
+    {
+        String name = accountRepository.findNameByNumAccount(numAccount);
+        return ResponseEntity.status(name != null ? HttpStatus.OK : HttpStatus.NOT_FOUND).body(name);
     }
 }

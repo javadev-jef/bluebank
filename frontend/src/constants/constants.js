@@ -29,7 +29,7 @@ export const FORM_ERROR_MESSAGES = {
     strToNumberError: "Somente números é permitido neste campo",
     invalidInitialDate: "Data inicial não pode ser maior que a data final",
     invalidFinalDate: "Data final não pode ser menor que a data inicial",
-    ageOfMajority: "Data inferior a 18 anos",
+    ageOfMajority: "Data de nascimento/fundação inválida",
     passwordConfirm: "A senha informada não é igual a anterior",
 }
 
@@ -61,7 +61,6 @@ export const TABLE_TEXT_LABEL = {
 
 export const DOWNLOAD_TABLE_CONFIG = (buildHead, buildBody, columns, data) => 
 {
-    console.log(data)
     return "\uFEFF" + buildHead(columns) + buildBody(data);
 }
 
@@ -78,7 +77,15 @@ export const DOWNLOAD_TABLE_OPTIONS = (filename) =>
     }
 }
 
-export const TABLE_THEME = {
+export const MATERIAL_THEME = 
+{
+    palette: 
+    {
+        primary: 
+        {
+            main: "#0091EA"
+        },
+    },
     overrides: 
     {
         MUIDataTable:

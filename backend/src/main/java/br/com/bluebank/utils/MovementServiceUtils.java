@@ -1,6 +1,7 @@
 package br.com.bluebank.utils;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,7 +22,11 @@ public class MovementServiceUtils
         mv.setFinalAmount(mv.getTempAmount());
         mv.setBalance(currentBalance);
         mv.setDescription(mv.getDescription() == null ? getDefaultDescription(mv.getMovementType()) : mv.getDescription());
-        account.setBalance(mv.getBalance());
+        
+        if(!mv.getScheduled())
+        {
+            account.setBalance(mv.getBalance());
+        }
 
         return mv;
     }   
@@ -34,5 +39,21 @@ public class MovementServiceUtils
         descriptions.put(MovementType.WITHDRAW, "Saque realizado via terminal virtual");
 
         return descriptions.get(movementType);
+    }
+
+    /**
+     * Should only be called when creating the account
+     * @param account
+     * @return Movement
+     */
+    public static Movement generateInitialMovement(Account account)
+    {
+        Movement mv = new Movement();
+        mv.setDate(LocalDateTime.now());
+        mv.setMovementType(MovementType.BONUS);
+        mv.setTempAmount(BigDecimal.valueOf(100));
+        mv.setAccount(account);
+
+        return mv;
     }
 }

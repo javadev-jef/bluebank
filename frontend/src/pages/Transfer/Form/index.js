@@ -1,10 +1,10 @@
-import React, {useState, useEffect, useCallback} from "react";
+import React, {useState, useEffect, useCallback, useContext} from "react";
 import { Link } from "react-router-dom";
 
 import { useForm } from "react-hook-form";
 import { Grid } from "@material-ui/core";
 
-import {formatCurrencyValue} from "../../../utils/functionUtils"
+import {formatCurrencyValue, isEmptyString} from "../../../utils/functionUtils"
 
 import Select from "../../../components/Select";
 import Input from "../../../components/Input";
@@ -17,8 +17,11 @@ import { API_ENDPOINT, CNPJ_MASK, CPF_MASK } from "../../../constants/constants"
 import axios from "axios";
 import InputDecimalFormat from "../../../components/InputDecimalFormat";
 import InputNumberFormat from "../../../components/InputNumberFormat";
+import { AuthContext } from "../../../hooks/useAuth";
+import {routes} from "../../../constants/paths.json";
+import { useHandleResponseError } from "../../../hooks/useHandleResponseError";
 
-const Form = ({onError = () => {}, onSuccess = () => {}, loadingData = false, clearForm = false, errorServer, serverComponents}) =>
+const Form = ({onError = () => {}, onSuccess = () => {}, loadingData = false, clearForm = false, fieldErrors, serverComponents}) =>
 {
     const {register, errors, control, clearErrors, handleSubmit, watch, reset, setError} = useForm(
     {
@@ -30,6 +33,9 @@ const Form = ({onError = () => {}, onSuccess = () => {}, loadingData = false, cl
     const [selectedTempDate, setSelectedTempDate] = useState(null);
     const [selectedAccountType, setSelectedAccountType] = useState();
     const {accountTypes, personTypes} = serverComponents;
+    const {credentials, buildAuthHeader} = useContext(AuthContext);
+    const [favoredName, setFavoredName] = useState("");
+    const {getResponseHandled} = useHandleResponseError();
 
     useEffect(() => 
     {
@@ -37,29 +43,29 @@ const Form = ({onError = () => {}, onSuccess = () => {}, loadingData = false, cl
     }, 
     [errors, onError]);
 
-    // Set manual errors to react-hook-form
+    // SET MANUAL ERRORS TO REACT-HOOK-FORM
     useEffect(()=>
     {
-        for(const error in errorServer)
+        for(const error in fieldErrors)
         {
-            setError(error, {message: errorServer[error]});
+            setError(error, {message: fieldErrors[error]});
         }
     },
-    [errorServer, setError]);
+    [fieldErrors, setError]);
 
     const getUserBalanceServer = useCallback(async () =>
     {
         try
         {
-            const response = await axios.get(`${API_ENDPOINT}/user/account/${selectedAccountType}/balance`);
-            setBalance(response.data.balance);
+            const {data} = await axios.get(`${API_ENDPOINT}/user/account/${selectedAccountType}/balance`, buildAuthHeader());
+            setBalance(data.balance);
         }
         catch(error)
         {
-            console.log(error);
+            getResponseHandled(error);
         }
     }, 
-    [selectedAccountType]);
+    [selectedAccountType, buildAuthHeader, getResponseHandled]);
 
     useEffect(() => 
     {
@@ -68,6 +74,7 @@ const Form = ({onError = () => {}, onSuccess = () => {}, loadingData = false, cl
             reset({});
             setSelectedTempDate(null);
             getUserBalanceServer();
+            setFavoredName("");
         }
 
     }, [clearForm, reset, getUserBalanceServer]);
@@ -81,6 +88,25 @@ const Form = ({onError = () => {}, onSuccess = () => {}, loadingData = false, cl
     const getBalanceCalculated = () =>
     {
         return (balance - watchAmount);
+    }
+
+    const fetchFavoredName = async (e) =>
+    {
+        try
+        {
+            const numAccount = e.target.value;
+
+            if(!isEmptyString(numAccount))
+            {
+                const {data} = await axios.get(`${API_ENDPOINT}/account/fetchFavoredName/${numAccount}`, buildAuthHeader());
+                setFavoredName(data);
+            }
+        }
+        catch(error)
+        {
+            setFavoredName("");
+            getResponseHandled(error);
+        }
     }
 
     return(
@@ -106,10 +132,9 @@ const Form = ({onError = () => {}, onSuccess = () => {}, loadingData = false, cl
                     <Grid item xs={8}>
                         <Input 
                             placeholder="Nome do usuário"
-                            name="userName" 
-                            refForm={register}
-                            title={errors.userName?.message}
-                            className={errors.userName && "input-error"}
+                            name="userName"
+                            defaultValue={credentials.name}
+                            readOnly
                         />
                     </Grid>
 
@@ -127,6 +152,7 @@ const Form = ({onError = () => {}, onSuccess = () => {}, loadingData = false, cl
                             refForm={register}
                             title={errors.numAccount?.message}
                             className={errors.numAccount && "input-error"}
+                            onBlur={fetchFavoredName}
                         />
                     </Grid>
 
@@ -147,9 +173,8 @@ const Form = ({onError = () => {}, onSuccess = () => {}, loadingData = false, cl
                         <Input 
                             placeholder="Favorecido" 
                             name="favoredName" 
-                            refForm={register}
-                            title={errors.favoredName?.message}
-                            className={errors.favoredName && "input-error"}
+                            defaultValue={favoredName}
+                            readOnly
                         />
                     </Grid>
 
@@ -249,7 +274,7 @@ const Form = ({onError = () => {}, onSuccess = () => {}, loadingData = false, cl
                 />
                 <Link 
                     style={{width: 180}}
-                    to={loadingData ? "#" : "/home"} 
+                    to={loadingData ? "#" : routes.home} 
                     className={`button-cancel ${loadingData && 'disabled'}`} 
                 >
                     <span>Voltar</span>

@@ -1,0 +1,13 @@
+{
+    "routes":
+    {
+        "logon": "/login",
+        "register": "/register",
+        "home": "/home",
+        "statement": "/statement",
+        "transfer": "/transfer",
+        "deposit": "/deposit",
+        "withdraw": "/withdraw",
+        "profile": "/profile"
+    }
+}

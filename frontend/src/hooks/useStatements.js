@@ -1,16 +1,20 @@
-import { useState } from "react";
+import { useCallback, useContext, useState } from "react";
 import axios from "axios";
 import {API_ENDPOINT} from "../constants/constants";
 import { useEffect } from "react";
+import { AuthContext } from "./useAuth";
+import { useHandleResponseError } from "./useHandleResponseError";
 
-export const useStatements = () =>
+export const useStatements = (setAlertMessage) =>
 {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [response, setResponse] = useState({});
     const [allDebits, setAllDebits] = useState(0);
     const [allCredits, setAllCredits] = useState(0);
     const [balance, setBalance] = useState(0);
+    const {buildAuthHeader} = useContext(AuthContext);
+    const {getResponseHandled} = useHandleResponseError();
+    const [inputErrors, setInputErrors] = useState([]);
 
     useEffect(()=>
     {
@@ -19,30 +23,30 @@ export const useStatements = () =>
     }, 
     [data]);
 
-    const fetch = async (formData) =>
+    const fetch = useCallback(async (formData) =>
     {
+        setLoading(true);
+
         try
-        {
+        {  
             setData([{}]);
-            setLoading(true);
-            setResponse({type: null, msg: null, loading: true});
+            const {data} = await axios.post(`${API_ENDPOINT}/user/account/statement`, formData, buildAuthHeader());
+            setData(data.movements);
+            setBalance(data.balance);
 
-            const response = await axios.post(`${API_ENDPOINT}/statement`, formData);
-            setData(response.data.movements);
-            setBalance(response.data.balance);
-
-            //setLoading(false);
-            setResponse({type: "info", msg: "Busca realizada com sucesso!", loading: false});
+            setLoading(false);
+            setAlertMessage({type: "info", value: "Busca realizada com sucesso!", open: true});
         }
         catch(error)
         {
             setData([]);
-            setResponse({type: "error", msg: "Erro ao buscar dados do servidor.", loading: false});
-        }
-        finally{
+            const {alertError, fieldErrors} = getResponseHandled(error);
+            setAlertMessage(alertError);
+            setInputErrors(fieldErrors);
             setLoading(false);
         }
-    }
+    }, 
+    [buildAuthHeader, setAlertMessage, getResponseHandled]);
 
     const calculateDebits = (total, data) =>
     {
@@ -54,11 +58,11 @@ export const useStatements = () =>
         return data.finalAmount > 0 ? total + data.finalAmount : total;
     } 
 
-    const clearStatement = () =>
+    const clearStatement = useCallback(() =>
     {
         setData([]);
         setBalance(0)
-    }
+    }, []);
 
-    return {data, fetch, loading, allDebits, allCredits, response, balance, clearStatement};
+    return {data, fetch, loading, allDebits, allCredits, balance, clearStatement, inputErrors};
 }

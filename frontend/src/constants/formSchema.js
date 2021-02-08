@@ -9,7 +9,7 @@ yup.setLocale({
         required: "Campo obrigatório",
     },
     date:{
-        required: "Campo obrigatório"
+        required: "Campo obrigatório",
     },
     number:{
         min: 'Deve ser maior que ${min}',
@@ -19,9 +19,18 @@ yup.setLocale({
         min: "Campo deve possuir no minimo ${min} caracter(es)",
         length: "Este campo deve possuir ${length} caracter(es)",
         max: "Este campo deve possuir no máximo ${max} caracter(es)",
-        email: "E-mail informado é inválido"
+        email: "E-mail informado é inválido",
     }
 });
+
+export const loginForm = () =>  yupResolver(
+    yup.object().shape(
+    {
+       username: yup.string().min(5).max(14),
+       password: yup.string().min(6).max(80),
+       logonType: yup.string().required()
+    })
+);
 
 export const registerForm = (passwordRequired = false) =>  yupResolver(
     yup.object().shape(
@@ -33,7 +42,11 @@ export const registerForm = (passwordRequired = false) =>  yupResolver(
             then: yup.string().required().length(11),
             otherwise: yup.string().required().length(14)
         }),
-        birthDate: yup.date().required().isDateValid(DATE_FORMAT).isAgeOfMajority(),
+        birthDate: yup.date().nullable().isDateValid(DATE_FORMAT).when("personType",{
+            is: val => val === "CNPJ",
+            then: yup.date().required().isAgeOfMajority(1),
+            otherwise: yup.date().required().isAgeOfMajority(18)
+        }),
         email: yup.string().required().email(),
         stateId: yup.number().required().integer().isSelected().positive(),
         cityId: yup.number().required().integer().isSelected().positive(),
@@ -49,7 +62,6 @@ export const withdrawForm = () =>  yupResolver(
     yup.object().shape(
     {
         accountType: yup.string().required(),
-        userName: yup.string().required().min(4),
         cashType: yup.string().required(),
         amount: yup.number().typeError(FORM_ERROR_MESSAGES.strToNumberError).required().moreThan(9),
     })
@@ -60,7 +72,6 @@ export const depositForm = () =>  yupResolver(
     {
         numAccount: yup.string().required().matches(/^\d+$/, FORM_ERROR_MESSAGES.strToNumberError).min(5),
         accountType: yup.string().required(),
-        userName: yup.string().required().min(4),
         depositorName: yup.string().required().min(6),
         cpfCnpj: yup.string().required().min(11).max(14),
         phone: yup.string().required().min(10).max(11),
@@ -77,8 +88,8 @@ export const statementForm = (initialDate, finalDate) =>  yupResolver(
     yup.object().shape(
     {
         accountType: yup.string().required(),
-        initialDate: yup.date().required().isDateValid(DATE_FORMAT).validateInitialDate(finalDate),
-        finalDate: yup.date().required().isDateValid(DATE_FORMAT).validateFinalDate(initialDate)
+        initialDate: yup.date().required().nullable().isDateValid(DATE_FORMAT).validateInitialDate(finalDate),
+        finalDate: yup.date().required().nullable().isDateValid(DATE_FORMAT).validateFinalDate(initialDate)
     })
 );
 
@@ -86,10 +97,8 @@ export const transferForm = () => yupResolver(
     yup.object().shape(
     {
         userAccountType: yup.string().required(),
-        userName: yup.string().required().min(4),
         numAccount: yup.string().required().matches(/^\d+$/, FORM_ERROR_MESSAGES.strToNumberError).min(5),
         accountType: yup.string().required(),
-        favoredName: yup.string().required().min(4),
         personType: yup.string().required(),
         cpfCnpj: yup.string().required().min(11).max(14),
         amount: yup.number().typeError(FORM_ERROR_MESSAGES.strToNumberError).required().moreThan(9),
@@ -98,12 +107,11 @@ export const transferForm = () => yupResolver(
     })
 );
 
-yup.addMethod(yup.date, "isAgeOfMajority", function()
+yup.addMethod(yup.date, "isAgeOfMajority", function(years)
 {
     return this.test("isAgeOfMajority", FORM_ERROR_MESSAGES.ageOfMajority, (value) => 
     {
-        const maxDate = moment(new Date(), DATE_FORMAT, true).subtract(18, "years");
-        //console.log(new Date(maxDate));
+        const maxDate = moment(new Date(), DATE_FORMAT, true).subtract(years, "years");
         return this.isDateValid() && moment(maxDate, DATE_FORMAT, true).diff(moment(value, DATE_FORMAT, true), "days", true) >= 0;
     })
 });

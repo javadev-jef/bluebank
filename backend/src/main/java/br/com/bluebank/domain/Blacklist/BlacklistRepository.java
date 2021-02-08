@@ -6,9 +6,9 @@ import java.util.List;
 import javax.transaction.Transactional;
 
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
-@Repository
+@RepositoryRestResource(exported = false)
 public interface BlacklistRepository extends CrudRepository<Blacklist, String>
 {
     @Transactional

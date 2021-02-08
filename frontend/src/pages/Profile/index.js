@@ -1,33 +1,31 @@
-import React, { useState, useCallback } from "react";
-
-import { Link } from "react-router-dom";
-
-import { FiArrowLeft } from "react-icons/fi";
-
-import Form from "./Form";
-import AlertMessage from "../../components/AlertMessage";
-
-import { API_ENDPOINT } from "../../constants/constants";
-
-import "./style.scss";
-
 import axios from "axios";
+import React, { useCallback, useContext, useState } from "react";
+import { FiArrowLeft } from "react-icons/fi";
+import { Link } from "react-router-dom";
+import AlertMessage from "../../components/AlertMessage";
 import Logo from "../../components/Logo";
+import { API_ENDPOINT } from "../../constants/constants";
+import { AuthContext } from "../../hooks/useAuth";
 import { useDefaultResponseServer } from "../../hooks/useDefaultResponseServer";
+import {routes} from "../../constants/paths.json";
+import Form from "./Form";
+import "./style.scss";
+import { useHandleResponseError } from "../../hooks/useHandleResponseError";
 
 const Profile = () =>
 {
-    const [alertProps, setAlertProps] = useState({open: false});
+    const [alertMessage, setAlertMessage] = useState({open: false});
     const [loading, setLoading] = useState(false);
-    const [errors, setErrors] = useState([]);
-    const {serverComponents} = useDefaultResponseServer(setAlertProps);
+    const [inputErrors, setInputErrors] = useState([]);
+    const {serverComponents} = useDefaultResponseServer(setAlertMessage);
+    const {buildAuthHeader, requestLogout} = useContext(AuthContext);
+    const {getResponseHandled} = useHandleResponseError();
     
     const onErrorForm = useCallback((errors) =>
     {
         if(Object.entries(errors).length > 0)
         {
-            setAlertProps({type: "error", message: "Todos os campos em destaque são obrigatórios.", open: true});
-            console.log(errors);
+            setAlertMessage({type: "error", value: "Todos os campos em destaque são obrigatórios.", open: true});
         }
     }, []);
 
@@ -36,33 +34,18 @@ const Profile = () =>
         try
         {
             setLoading(true);
-            await axios.put(`${API_ENDPOINT}/user/profile/update`, data);
+            await axios.put(`${API_ENDPOINT}/user/profile/update`, data, buildAuthHeader());
+            setLoading(false);
             
-            setAlertProps({type: "success", message: "Dados alterados com sucesso!", open: true});
+            const expiredSession = {type: "success", value: "Dados alterados com sucesso! Realize um novo login para continuar", open: true};
+            requestLogout(expiredSession);
         }
         catch(error)
         {
-            const response = error.response;
-            const data = response && response.data;
-            const errors = response && data.errors;
-            const message = response && data.message;
+            const {alertError, fieldErrors} = getResponseHandled(error);
+            setAlertMessage(alertError);
+            setInputErrors(fieldErrors);
 
-            if(response && errors && response.status === 400)
-            {
-                setErrors(errors);
-                setAlertProps({type: "error", message: "Ops! Os dados não foram preenchidos corretamente.", open: true});
-            }
-            else if(response && message)
-            {
-                setAlertProps({type: "error", message: message, open: true});
-            }
-            else{
-                setAlertProps({type: "error", message: "Falha na tentativa de conexão com servidor.", open: true});
-            }
-            console.log(error);
-        }
-        finally
-        {
             setLoading(false);
         }
     }
@@ -79,25 +62,26 @@ const Profile = () =>
                         <li>Redução de erros na comunicação.</li>
                         <li>Informações sempre corretas, e atuais.</li>
                     </ol>
-                    <Link className="link-to" to="/home"><FiArrowLeft />Voltar para home</Link>
+                    <Link className="link-to" to={routes.home}><FiArrowLeft />Voltar para home</Link>
                 </section>
                 <Form 
                     loadingData={loading}
                     onError={onErrorForm} 
                     onSuccess={onSuccessForm}
                     serverComponents={serverComponents}
-                    errorServer={errors}
+                    fieldErrors={inputErrors}
+                    callAlert={setAlertMessage}
                 />
             </main>
 
             <AlertMessage 
                 maxWidth={450} 
-                open={alertProps.open}
+                open={alertMessage.open}
                 autoHideDuration={8000} 
-                severity={alertProps.type}
-                message={alertProps.message}
+                severity={alertMessage.type}
+                message={alertMessage.value}
                 anchorOrigin={{vertical: "bottom", horizontal: "left"}}
-                onClose={() => setAlertProps({...alertProps, open: false})}
+                onClose={() => setAlertMessage({...alertMessage, open: false})}
             />
         </div>
     );

@@ -1,23 +1,30 @@
-import React, { useEffect, useState }  from "react";
-
+import { Grid } from "@material-ui/core";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Grid, CircularProgress } from "@material-ui/core";
-import { depositForm } from "../../../constants/formSchema";
+import { MdAttachFile } from "react-icons/md";
 import { Link } from "react-router-dom";
-import {MdAttachFile} from "react-icons/md";
+import Button from "../../../components/Button";
 import Input from "../../../components/Input";
-import Select from "../../../components/Select";
 import InputDecimalFormat from "../../../components/InputDecimalFormat";
 import InputNumberFormat from "../../../components/InputNumberFormat";
-import { CNPJ_MASK, CPF_MASK, PHONE_MASK_01, PHONE_MASK_02 } from "../../../constants/constants";
+import Select from "../../../components/Select";
+import { API_ENDPOINT, CNPJ_MASK, CPF_MASK, PHONE_MASK_01, PHONE_MASK_02 } from "../../../constants/constants";
+import { depositForm } from "../../../constants/formSchema";
+import { routes } from "../../../constants/paths.json";
+import { useHandleResponseError } from "../../../hooks/useHandleResponseError";
+import { isEmptyString } from "../../../utils/functionUtils";
 
-const Form = ({onSuccess = () =>{}, onError = () =>{}, isUserLogged = false, loadingData = false, serverComponents, clearForm, errorServer}) =>
+
+const Form = ({onSuccess = () =>{}, onError = () =>{}, isUserLogged = false, loadingData = false, serverComponents, clearForm, fieldErrors}) =>
 {
     const {register, control, clearErrors,setError, errors, handleSubmit, reset} = useForm({resolver: depositForm()});
 
     const {accountTypes, cashTypes} = serverComponents;
 
     const [selectedCashType, setSelectedCashType] = useState("");
+    const [favoredName, setFavoredName] = useState("");
+    const {getResponseHandled} = useHandleResponseError();
 
     useEffect(() => 
     {
@@ -30,19 +37,39 @@ const Form = ({onSuccess = () =>{}, onError = () =>{}, isUserLogged = false, loa
         if(clearForm)
         {
             reset();
+            setFavoredName("");
         }
     },
     [clearForm, reset]);
 
-    // Set manual errors to react-hook-form
+    // SET MANUAL ERRORS TO REACT-HOOK-FORM
     useEffect(()=>
     {
-        for(const error in errorServer)
+        for(const error in fieldErrors)
         {
-            setError(error, {message: errorServer[error]});
+            setError(error, {message: fieldErrors[error]});
         }
-    }, 
-    [errorServer, setError]);
+    },
+    [fieldErrors, setError]);
+
+    const fetchFavoredName = async (e) =>
+    {
+        try
+        {
+            const numAccount = e.target.value;
+
+            if(!isEmptyString(numAccount))
+            {
+                const {data} = await axios.get(`${API_ENDPOINT}/account/fetchFavoredName/${numAccount}`);
+                setFavoredName(data);
+            }
+        }
+        catch(error)
+        {
+            setFavoredName("");
+            getResponseHandled(error);
+        }
+    }
 
     return(
         <form onSubmit={handleSubmit(onSuccess)} autoComplete={"off"}>
@@ -57,6 +84,7 @@ const Form = ({onSuccess = () =>{}, onError = () =>{}, isUserLogged = false, loa
                             refForm={register}
                             title={errors.numAccount?.message}
                             className={errors.numAccount && "input-error"}
+                            onBlur={fetchFavoredName}
                         />
                     </Grid>
 
@@ -75,11 +103,11 @@ const Form = ({onSuccess = () =>{}, onError = () =>{}, isUserLogged = false, loa
 
                     <Grid item xs={6}>
                         <Input 
-                            name="userName"
+                            name="favoredName"
                             placeholder="Nome do Destinatário"
                             refForm={register}
-                            title={errors.userName?.message}
-                            className={errors.userName && "input-error"}
+                            value={favoredName}
+                            readOnly
                         />
                     </Grid>
 
@@ -108,6 +136,8 @@ const Form = ({onSuccess = () =>{}, onError = () =>{}, isUserLogged = false, loa
                             altMask={{length:14, value: CNPJ_MASK}}
                             title={errors.cpfCnpj?.message}
                             className={errors.cpfCnpj && "input-error"}
+                            allowNegative={false}
+                            decimalSeparator={false}
                         />
                     </Grid>
 
@@ -174,18 +204,15 @@ const Form = ({onSuccess = () =>{}, onError = () =>{}, isUserLogged = false, loa
             </fieldset>
             
             <div className="input-group">
-                <button 
-                    type="submit"
-                    className="button" 
-                    style={{width: 180}} 
-                    onClick={() => clearErrors()} 
-                    disabled={loadingData} 
-                >
-                    {loadingData ? <CircularProgress style={{color: "#FFF"}}/> : "Depositar"}
-                </button>
+                <Button 
+                    style={{width: 180}}
+                    onClick={() => clearErrors()}
+                    loading={loadingData}
+                    value="Depositar"
+                />
                 <Link 
                     style={{width: 180}}
-                    to={loadingData ? "#" : isUserLogged ? "/home" : "/"} 
+                    to={loadingData ? "#" : isUserLogged ? routes.home : routes.logon} 
                     className={`button-cancel ${loadingData && 'disabled'}`} 
                 >
                         <span>Voltar</span>

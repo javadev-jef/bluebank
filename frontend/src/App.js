@@ -1,9 +1,10 @@
 import React from 'react';
-import Logon from './pages/Logon';
+import { Redirect } from 'react-router-dom';
+import {routes} from "./constants/paths.json";
 
 function App() {
   return (
-    <Logon />
+    <Redirect to={routes.logon} />
   );
 }
 

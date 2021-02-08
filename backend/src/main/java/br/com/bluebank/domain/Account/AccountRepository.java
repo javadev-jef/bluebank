@@ -27,4 +27,7 @@ public interface AccountRepository extends JpaRepository<Account, String>
 
     @Query("SELECT a.numAccount FROM Account AS a WHERE a.user.cpfCnpj = ?1 AND a.accountType = ?2")
     public String obtainNumAccountByParams(String username, AccountType accountType);
+
+    @Query("SELECT a.user.name FROM Account AS a WHERE a.numAccount = ?1")
+    public String findNameByNumAccount(String numAccount);
 }

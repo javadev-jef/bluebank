@@ -1,16 +1,13 @@
-import React from "react";
+import { Backdrop, CircularProgress } from "@material-ui/core";
+import moment from "moment";
 import MUIDataTable from "mui-datatables";
-import {createMuiTheme, MuiThemeProvider} from "@material-ui/core/styles"
+import React from "react";
+import { DOWNLOAD_TABLE_CONFIG, DOWNLOAD_TABLE_OPTIONS, TABLE_TEXT_LABEL } from "../../constants/constants";
 import { formatCurrencyValue } from "../../utils/functionUtils";
 import "./style.scss";
-import { CircularProgress, Backdrop } from "@material-ui/core";
-import { TABLE_THEME, TABLE_TEXT_LABEL, DOWNLOAD_TABLE_CONFIG, DOWNLOAD_TABLE_OPTIONS } from "../../constants/constants";
-import moment from "moment";
 
 const StatementListTable = ({statements}) =>
 {
-    const theme = createMuiTheme(TABLE_THEME);
-
     const valueColumns = {
         customBodyRender: value => formatCurrencyValue(value),
     };
@@ -65,15 +62,13 @@ const StatementListTable = ({statements}) =>
                 <CircularProgress style={{color: "#0091EA", marginTop: "64px", marginBottom: "12px"}}/>
                 <span>Carregando...</span>
             </Backdrop>
-            <MuiThemeProvider theme={theme}>
-                <MUIDataTable
-                    title={"Extrato"}
-                    data={statements.data}
-                    columns={headers}
-                    options={statements.loading ? {...options, customRowRender: () => null} : {...options, customRowRender: null}}
-                    className="mui-datatable-custom"
-                />
-            </MuiThemeProvider>
+            <MUIDataTable
+                title={"Extrato"}
+                data={statements.data}
+                columns={headers}
+                options={statements.loading ? {...options, customRowRender: () => null} : {...options, customRowRender: null}}
+                className="mui-datatable-custom"
+            />
         </div>
     );
 }

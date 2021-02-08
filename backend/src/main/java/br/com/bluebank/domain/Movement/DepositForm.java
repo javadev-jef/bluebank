@@ -31,7 +31,7 @@ public class DepositForm implements Serializable
     private AccountType accountType;
 
     @Size(min = 4, message = "O nome do destinatário informando é muito pequeno")
-    private String userName;
+    private String favoredName;
 
     @Size(min = 6, message = "O nome do depositante deve possui no minimo 6 caracteres")
     @NotNull(message = "O nome do depositante não foi informado")

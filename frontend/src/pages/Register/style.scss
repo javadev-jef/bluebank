@@ -55,7 +55,7 @@ div.register-container
 }
 
 // Media Queries
-@media screen and (max-width: 930px)
+@media screen and (max-width: 1000px)
 {
     div.content
     {
@@ -65,7 +65,7 @@ div.register-container
     }
 }
 
-@media screen and (max-width: 890px)
+@media screen and (max-width: 930px)
 {
     div.content
     {
@@ -75,7 +75,7 @@ div.register-container
         section
         {
             max-width: 450px !important;
-            margin-right: 0 !important;
+
             p{
                 display: none;
             }

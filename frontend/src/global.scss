@@ -104,6 +104,10 @@ form
         padding: $inputPadding;
         padding-right: 6px !important;
     }
+    input:read-only
+    {
+        cursor: no-drop;
+    }
 
     .input-error
     {

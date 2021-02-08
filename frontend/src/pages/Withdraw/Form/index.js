@@ -1,25 +1,28 @@
-import React, { useCallback, useState, useEffect } from "react";
-
-import {Grid, CircularProgress} from "@material-ui/core";
+import { Grid } from "@material-ui/core";
+import axios from "axios";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
-import { withdrawForm } from "../../../constants/formSchema";
+import Button from "../../../components/Button";
 import Input from "../../../components/Input";
-import Select from "../../../components/Select";
-
-import { formatCurrencyValue } from "../../../utils/functionUtils";
-import { API_ENDPOINT } from "../../../constants/constants";
-
-import axios from "axios";
 import InputDecimalFormat from "../../../components/InputDecimalFormat";
+import Select from "../../../components/Select";
+import { API_ENDPOINT } from "../../../constants/constants";
+import { withdrawForm } from "../../../constants/formSchema";
+import { AuthContext } from "../../../hooks/useAuth";
+import { useHandleResponseError } from "../../../hooks/useHandleResponseError";
+import { formatCurrencyValue } from "../../../utils/functionUtils";
+import {routes} from "../../../constants/paths.json";
 
-const Form = ({loadingData = false, onSuccess = ()=>{}, onError = ()=>{}, errorServer, serverComponents, clearForm}) =>
+const Form = ({loadingData = false, onSuccess = ()=>{}, onError = ()=>{}, fieldErrors, serverComponents, clearForm}) =>
 {
     const {register, control, errors, setError, handleSubmit, clearErrors, watch, reset} = useForm({resolver: withdrawForm()});
     const [balance, setBalance] = useState(0);
     const watchAmount = watch("amount", 0);
     const {accountTypes, cashTypes} = serverComponents;
     const [selectedAccountType, setSelectedAccountType] = useState();
+    const {buildAuthHeader, credentials} = useContext(AuthContext);
+    const {getResponseHandled} = useHandleResponseError();
 
     useEffect(()=>
     {
@@ -30,26 +33,26 @@ const Form = ({loadingData = false, onSuccess = ()=>{}, onError = ()=>{}, errorS
     // SET MANUAL ERRORS TO REACT-HOOK-FORM
     useEffect(()=>
     {
-        for(const error in errorServer)
+        for(const error in fieldErrors)
         {
-            setError(error, {message: errorServer[error]});
+            setError(error, {message: fieldErrors[error]});
         }
     }, 
-    [errorServer, setError])
+    [fieldErrors, setError])
 
     const getBalanceServer = useCallback(async () =>
     {
         try
         {
-            const response = await axios.get(`${API_ENDPOINT}/user/account/${selectedAccountType}/balance`);
-            setBalance(response.data.balance);
+            const {data} = await axios.get(`${API_ENDPOINT}/user/account/${selectedAccountType}/balance`, buildAuthHeader());
+            setBalance(data.balance);
         }
         catch(error)
         {
-            console.log(error);
+            getResponseHandled(error);
         }
     }, 
-    [selectedAccountType]);
+    [selectedAccountType, buildAuthHeader, getResponseHandled]);
     
     useEffect(()=>
     {
@@ -98,8 +101,8 @@ const Form = ({loadingData = false, onSuccess = ()=>{}, onError = ()=>{}, errorS
                             placeholder="Nome do usuário"
                             name='userName' 
                             refForm={register}
-                            title={errors.userName?.message}
-                            className={errors.userName && "input-error"}
+                            value={credentials.name}
+                            readOnly
                         />
                     </Grid>
 
@@ -153,18 +156,16 @@ const Form = ({loadingData = false, onSuccess = ()=>{}, onError = ()=>{}, errorS
             </fieldset>
 
             <div className="input-group">
-                <button 
-                    type="submit"
-                    className="button" 
+                <Button
                     style={{width: 180}} 
                     onClick={() => clearErrors()} 
-                    disabled={loadingData || balance === 0 || watchAmount > balance} 
-                >
-                    {loadingData ? <CircularProgress style={{color: "#FFF"}}/> : "Realizar Saque"}
-                </button>
+                    disabled={balance === 0 || watchAmount > balance}
+                    loading={loadingData}
+                    value="Realizar Saque"
+                />
                 <Link 
                     style={{width: 180}}
-                    to={loadingData ? "#" : "/home"} 
+                    to={loadingData ? "#" : routes.home} 
                     className={`button-cancel ${loadingData && 'disabled'}`} 
                 >
                         <span>Voltar</span>

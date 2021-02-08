@@ -17,43 +17,37 @@ import { useDefaultResponseServer } from "../../hooks/useDefaultResponseServer";
 
 export default function Statement()
 {
-    const statements = useStatements();
-    const [alertProps, setAlertProps] = useState({open: false});
-    const [currentAccount, setCurrentAccount] = useState(0);
-    const {serverComponents} = useDefaultResponseServer(setAlertProps);
+    const [alertMessage, setAlertMessage] = useState({open: false});
+    const statements = useStatements(setAlertMessage);
+    const {clearStatement, fetch, inputErrors} = statements;
+    const [currentAccount, setCurrentAccount] = useState("-");
+    const {serverComponents} = useDefaultResponseServer(setAlertMessage);
+    
+    const onFormSuccess = useCallback((data) =>
+    {
+        fetch(data);
+    },
+    [fetch]);
+
+    const onFormError = useCallback((errors) =>
+    {
+        if(Object.entries(errors).length > 0)
+        {
+            setAlertMessage({type: "error", value: "Todos os campos em destaque são obrigatórios.", open: true});
+        }
+    }, []);
+
+    useEffect(()=>
+    {
+        clearStatement();
+    },
+    [currentAccount, clearStatement]);
 
     const progressStyle = {
         marginLeft: 4,
         marginBottom: -1,
         display: !statements.loading && "none"
     }
-    
-    const onFormSuccess = (data) =>
-    {
-        statements.fetch(data);
-    }
-
-    const onErrorForm = useCallback((errors) =>
-    {
-        if(Object.entries(errors).length > 0)
-        {
-            setAlertProps({type: "error", message: "Todos os campos em destaque são obrigatórios.", open: true});
-            console.log(errors);
-        }
-    }, []);
-
-    useEffect(() =>
-    {
-        const response = statements.response;
-        response.msg != null && setAlertProps({type: response.type, message: response.msg, open: true});
-    }, 
-    [statements.response]);
-
-    useEffect(()=>
-    {
-        statements.clearStatement();
-    }, // eslint-disable-next-line react-hooks/exhaustive-deps
-    [currentAccount]);
 
     return(
         <div className="statement-container">
@@ -93,10 +87,11 @@ export default function Statement()
 
                 <Form 
                     onSuccess={onFormSuccess} 
-                    onError={onErrorForm} 
+                    onError={onFormError} 
                     loading={statements.loading}
                     onChangeAccount={setCurrentAccount}
                     serverComponents={serverComponents}
+                    fieldErrors={inputErrors}
                 />
 
                 <StatementListTable statements={statements}/>
@@ -104,12 +99,12 @@ export default function Statement()
             
             <AlertMessage
                 maxWidth={450}
-                open={alertProps.open}
+                open={alertMessage.open}
                 autoHideDuration={8000} 
-                severity={alertProps.type}
-                message={alertProps.message}
-                anchorOrigin={{vertical: "bottom", horizontal: "left"}}
-                onClose={() => setAlertProps({...alertProps, open: false})}
+                severity={alertMessage.type}
+                message={alertMessage.value}
+                anchorOrigin={{vertical: "bottom", horizontal: "right"}}
+                onClose={() => setAlertMessage({...alertMessage, open: false})}
             />
         </div>
     );

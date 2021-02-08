@@ -54,7 +54,7 @@ const Receipt = React.forwardRef(({onClose = ()=>{}, onPrint = ()=>{}, data, ser
                </header>
                <section>
                    <h3>Comprovante de Deposito</h3>
-                   <p>Deposito realizado no valor de <strong>{formatCurrencyValue(data.amount)}</strong> para {data.userName}.</p>
+                   <p>Deposito realizado no valor de <strong>{formatCurrencyValue(data.amount)}</strong> para {data.favoredName}.</p>
                    <div className="notes">
                         Depositos realizados após 18h00 serão compensados somente no próximo dia.
                    </div>

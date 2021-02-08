@@ -1,26 +1,25 @@
+import { Grid } from "@material-ui/core";
 import React, { useEffect, useState } from "react";
-
-import { CircularProgress, Grid } from "@material-ui/core";
+import { useForm } from "react-hook-form";
+import Button from "../../../components/Button";
 import DatePicker from "../../../components/DatePicker";
 import Input from "../../../components/Input";
+import InputNumberFormat from "../../../components/InputNumberFormat";
 import Select from "../../../components/Select";
-
+import { CNPJ_MASK, CPF_MASK } from "../../../constants/constants";
 import { registerForm } from "../../../constants/formSchema";
-
-import { useForm } from "react-hook-form";
 import { useCities } from "../../../hooks/useCities";
 import { useStates } from "../../../hooks/useStates";
-
 import { getAgeOfMajority } from "../../../utils/functionUtils";
 
-const Form = ({onError = ()=>{}, onSuccess = ()=>{}, loadingData, serverComponents, errorServer, clearForm = false}) =>
+const Form = ({onError = ()=>{}, onSuccess = ()=>{}, loadingData, fieldErrors, serverComponents, clearForm = false}) =>
 {
+    const {personTypes} = serverComponents;
     const {cities, cityList} = useCities();
     const {states} = useStates();
-    const {personTypes} = serverComponents;
 
     const [birthDateTemp, setBirthDateTemp] = useState(null);
-    const {register, watch, handleSubmit, setError, errors, clearErrors, reset} = useForm({resolver: registerForm(true)});
+    const {register, watch, control, handleSubmit, setError, errors, clearErrors, reset} = useForm({resolver: registerForm(true)});
 
     useEffect(() => 
     {
@@ -31,12 +30,12 @@ const Form = ({onError = ()=>{}, onSuccess = ()=>{}, loadingData, serverComponen
     // SET MANUAL ERRORS TO REACT-HOOK-FORM
     useEffect(()=>
     {
-        for(const error in errorServer)
+        for(const error in fieldErrors)
         {
-            setError(error, {message: errorServer[error]});
+            setError(error, {message: fieldErrors[error]});
         }
     }, 
-    [errorServer, setError]);
+    [fieldErrors, setError]);
 
     useEffect(() => 
     {
@@ -76,10 +75,11 @@ const Form = ({onError = ()=>{}, onSuccess = ()=>{}, loadingData, serverComponen
                 </Grid>
 
                 <Grid item xs={6}>
-                    <Input 
+                    <InputNumberFormat
+                        useFormControl={control}
+                        name="cpfCnpj"
                         placeholder={watch("personType") ? watch("personType") : "CPF/CNPJ"}
-                        name="cpfCnpj"   
-                        refForm={register} 
+                        format={watch("personType") === "CPF" ? CPF_MASK : CNPJ_MASK}
                         title={errors.cpfCnpj?.message}
                         className={errors.cpfCnpj && "input-error"}
                     />
@@ -87,10 +87,10 @@ const Form = ({onError = ()=>{}, onSuccess = ()=>{}, loadingData, serverComponen
 
                 <Grid item xs={6}>
                     <DatePicker 
-                        placeholder="Nascimento"  
+                        placeholder={watch("personType") === "CNPJ" ? "Fundação" : "Nascimento"}  
                         name="birthDate"
                         refForm={register} 
-                        maxDate={getAgeOfMajority(new Date())}
+                        maxDate={getAgeOfMajority(new Date(), watch("personType"))}
                         value={birthDateTemp}
                         onChange={setBirthDateTemp}
                         title={errors.birthDate?.message}
@@ -132,6 +132,7 @@ const Form = ({onError = ()=>{}, onSuccess = ()=>{}, loadingData, serverComponen
                         refForm={register}
                         title={errors.cityId?.message}
                         className={errors.cityId && "input-error"}
+                        disabled={cities.length === 0}
                     />
                 </Grid>
 
@@ -158,14 +159,11 @@ const Form = ({onError = ()=>{}, onSuccess = ()=>{}, loadingData, serverComponen
                 </Grid>
                 
             </Grid>
-            <button 
-                type="submit"
-                className="button" 
-                onClick={() => clearErrors()} 
-                disabled={loadingData} 
-            >
-                {loadingData ? <CircularProgress style={{color: "#FFF"}}/> : "Realizar Cadastro"}
-            </button>
+            <Button
+                value="Realizar Cadastro"
+                onClick={() => clearErrors()}
+                loading={loadingData}
+            />
         </form>
     );
 }
