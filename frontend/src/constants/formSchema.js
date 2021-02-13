@@ -26,9 +26,13 @@ yup.setLocale({
 export const loginForm = () =>  yupResolver(
     yup.object().shape(
     {
-       username: yup.string().min(5).max(14),
-       password: yup.string().min(6).max(80),
-       logonType: yup.string().required()
+        username: yup.string().when("logonType",{
+            is: val => val === "NUM_ACCOUNT",
+            then: yup.string().length(5),
+            otherwise: yup.string().min(11).max(14)
+        }),
+        password: yup.string().min(6).max(80),
+        logonType: yup.string().required()
     })
 );
 

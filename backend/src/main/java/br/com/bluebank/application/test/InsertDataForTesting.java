@@ -137,14 +137,14 @@ public class InsertDataForTesting
         users.add(user);
 
         user = new User();
-        user.setBirthDate(LocalDate.now().minusYears(18));
-        user.setCityId(2);
+        user.setBirthDate(LocalDate.now().minusYears(1));
+        user.setCityId(4106902);
         user.setCpfCnpj("60721994000167");
         user.setEmail("empresa@email.com.br");
         user.setName("Empresa LTDA");
         user.setPassword("123456");
         user.setPersonType(PersonType.CNPJ);
-        user.setStateId(1);
+        user.setStateId(41);
         user = userService.save(user);
         users.add(user);
 

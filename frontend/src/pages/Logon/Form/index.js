@@ -1,5 +1,5 @@
 import { Grid } from "@material-ui/core";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FiLogIn } from "react-icons/fi";
 import { HiOutlineSave } from "react-icons/hi";
@@ -13,10 +13,19 @@ import {routes} from "../../../constants/paths.json";
 
 const Form = ({onError = ()=>{}, onSuccess = ()=>{}, loadingData, fieldErrors, serverComponents, clearForm = false}) =>
 {
-    const {register, handleSubmit, control, setError, clearErrors, reset, errors} = useForm({resolver: loginForm()});
+    const {register, handleSubmit, control, getValues, setError, clearErrors, reset, errors} = useForm({resolver: loginForm()});
     const logonTypes = serverComponents.logonTypes;
+    const [usernameMaxLength, setUsernameMaxLength] = useState(5);
+
+    const onLogonTypeChange = (e) =>
+    {
+        const logonType = e.target.value;
+        reset({...getValues(), username: ""})
+
+        setUsernameMaxLength(logonType === "CPF_CNPJ" ? 14 : 5);
+    }
     
-    useEffect(() => 
+    useEffect(() =>
     {
         onError(errors);
     }, 
@@ -57,6 +66,7 @@ const Form = ({onError = ()=>{}, onSuccess = ()=>{}, loadingData, fieldErrors, s
                         refForm={register}
                         title={errors.logonType?.message}
                         className={errors.logonType && "input-error"}
+                        onChange={e => onLogonTypeChange(e)}
                     />
                 </Grid>
                 <Grid item xs={7}>
@@ -72,12 +82,13 @@ const Form = ({onError = ()=>{}, onSuccess = ()=>{}, loadingData, fieldErrors, s
                         altMask={{length:14, value: CNPJ_MASK}}
                         title={errors.username?.message}
                         className={errors.username && "input-error"}
+                        maxLength={usernameMaxLength}
                     />
                 </Grid>
                 <Grid item xs={12}>
                     <input 
-                        type="password" 
-                        name="password" 
+                        type="password"
+                        name="password"
                         ref={register} 
                         placeholder="Senha"
                         title={errors.password?.message}
