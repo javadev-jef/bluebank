@@ -77,6 +77,7 @@ public class DepositService
         LocalDateTime finalDate = currentDate.isAfter(limitDate) ? LocalDateTime.now().plusDays(1) : LocalDateTime.now();
 
         Long lastNumTransaction = movementRepository.findLastNumTransaction();
+        Long lastSequence = movementRepository.findLastSequence();
 
         Movement mvd = new Movement();
         mvd.setAccount(account);
@@ -85,6 +86,7 @@ public class DepositService
         mvd.setScheduled(currentDate.isAfter(limitDate));
         mvd.setMovementType(MovementType.DEPOSIT);
         mvd.setNumTransaction(lastNumTransaction);
+        mvd.setSequence(lastSequence);
         mvd = MovementServiceUtils.prepareToSave(mvd);
         movementRepository.save(mvd);
         

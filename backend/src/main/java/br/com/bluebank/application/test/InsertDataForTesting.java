@@ -28,7 +28,6 @@ import br.com.bluebank.domain.Movement.Movement.MovementType;
 import br.com.bluebank.domain.Movement.TransferForm;
 import br.com.bluebank.domain.User.User;
 import br.com.bluebank.domain.User.User.PersonType;
-import br.com.bluebank.utils.MovementServiceUtils;
 
 @Component
 public class InsertDataForTesting 
@@ -88,15 +87,9 @@ public class InsertDataForTesting
      * @param accounts : User accounts
      * @throws InsufficienteBalanceException
      */
-    private void setMovements(Account[] accounts) throws InsufficienteBalanceException {
-        Movement mv;
-        for (int i = 0; i <= (accounts.length - 1); i++) 
-        {
-            mv = MovementServiceUtils.generateInitialMovement(accounts[i]);
-            movementService.save(mv);
-        }
-
-        mv = new Movement();
+    private void setMovements(Account[] accounts) throws InsufficienteBalanceException 
+    {
+        Movement mv = new Movement();
         mv.setDate(LocalDateTime.now().plusSeconds(1));
         mv.setMovementType(MovementType.WITHDRAW);
         mv.setTempAmount(BigDecimal.valueOf(50));
@@ -104,7 +97,8 @@ public class InsertDataForTesting
         movementService.save(mv);
     }
 
-    private void setTransfers() throws TransferException, InsufficienteBalanceException {
+    private void setTransfers() throws TransferException, InsufficienteBalanceException 
+    {
         List<Account> accounts = accountRepository.findAll();
         Account fromAccount = accounts.get(0); // 08111
         Account toAccount = accounts.get(2); // 08113

@@ -45,6 +45,12 @@ public class MovementService
             Long lastNumTransaction = movementRepository.findLastNumTransaction();
             mv.setNumTransaction(lastNumTransaction);
         }
+
+        if(mv.getSequence() == null)
+        {
+            Long lastSequence = movementRepository.findLastSequence();
+            mv.setSequence(lastSequence);
+        }
         
         mv = MovementServiceUtils.prepareToSave(mv);
         movementRepository.save(mv);

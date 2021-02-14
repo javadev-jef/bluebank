@@ -63,6 +63,7 @@ public class TransferService
         LocalDateTime endOfDay = LocalDate.now().atTime(23, 59);
 
         Long lastNumTransaction = movementRepository.findLastNumTransaction();
+        Long lastSequence = movementRepository.findLastSequence();
 
         // Source Account
         Movement mvt = new Movement();
@@ -73,6 +74,7 @@ public class TransferService
         mvt.setScheduled(whenToDo.isAfter(endOfDay));
         mvt.setAccount(fromAccount);
         mvt.setNumTransaction(lastNumTransaction);
+        mvt.setSequence(lastSequence);
         mvt = MovementServiceUtils.prepareToSave(mvt);
         movementRepository.save(mvt);
 
@@ -90,6 +92,7 @@ public class TransferService
         mvt.setScheduled(whenToDo.isAfter(endOfDay));
         mvt.setAccount(toAccount);
         mvt.setNumTransaction(lastNumTransaction);
+        mvt.setSequence(++lastSequence);
         mvt = MovementServiceUtils.prepareToSave(mvt);
         movementRepository.save(mvt);
 

@@ -46,6 +46,7 @@ public class WithdrawService
         Account userAccount = accountRepository.findByUsernameAndAccountType(username, wform.getAccountType()).orElseThrow();
 
         Long lastNumTransaction = movementRepository.findLastNumTransaction();
+        Long lastSequence = movementRepository.findLastSequence();
 
         Movement mvw = new Movement();
         mvw.setAccount(userAccount);
@@ -53,6 +54,7 @@ public class WithdrawService
         mvw.setMovementType(MovementType.WITHDRAW);
         mvw.setTempAmount(wform.getAmount());
         mvw.setNumTransaction(lastNumTransaction);
+        mvw.setSequence(lastSequence);
 
         mvw = MovementServiceUtils.prepareToSave(mvw);
 

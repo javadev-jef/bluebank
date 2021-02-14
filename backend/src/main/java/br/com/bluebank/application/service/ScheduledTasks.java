@@ -68,12 +68,15 @@ public class ScheduledTasks
 
         for(Movement deposit : deposits)
         {
+            Long lastSequence = movementRepository.findLastSequence();
+
             Account account = deposit.getAccount();
             BigDecimal balance = account.getBalance();
 
             deposit.setScheduled(false);
             deposit.setDate(LocalDateTime.now());
             deposit.setBalance(balance);
+            deposit.setSequence(lastSequence);
             account.setBalance(deposit.getBalance());
             
             movementRepository.save(deposit);
@@ -98,6 +101,10 @@ public class ScheduledTasks
             Movement transferTarget = prepareMovement(transfers, MovementType.TRANSFER_TARGET, null);
             Movement transferSource = prepareMovement(transfers, transferTarget);
 
+            Long lastSequence = movementRepository.findLastSequence();
+            transferTarget.setSequence(lastSequence);
+            transferSource.setSequence(++lastSequence);
+            
             try
             {
                 movementService.save(transferSource);

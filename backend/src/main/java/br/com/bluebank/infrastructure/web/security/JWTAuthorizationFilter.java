@@ -54,8 +54,6 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter
 
                 UsernamePasswordAuthenticationToken authentication = getAuthentication(token);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-
-                logger.debug(CLASS_NAME.concat("... SUCCESSFULY COMPLETE!"));
             }
             catch(ExpiredJwtException | BlockedTokenException ex)
             {

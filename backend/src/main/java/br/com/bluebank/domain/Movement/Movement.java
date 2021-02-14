@@ -66,6 +66,9 @@ public class Movement implements Serializable
     @NotNull(message = "O número da transação não pode ser null")
     private Long numTransaction;
 
+    @Column(unique = true, nullable = false)
+    private Long sequence;
+
     /**
      * Must be called by service and after setFinalAmount
      * 
@@ -107,12 +110,21 @@ public class Movement implements Serializable
     {
         if(lastNumTransaction == null)
         {
-            lastNumTransaction = 1L;
+            lastNumTransaction = 0L;
         }
 
         this.numTransaction = ++lastNumTransaction;
     }
 
+    public void setSequence(Long lastSequence)
+    {
+        if(lastSequence == null)
+        {
+            lastSequence = 0L;
+        }
+
+        this.sequence = ++lastSequence;
+    }
 
     @Getter
     public enum MovementType
