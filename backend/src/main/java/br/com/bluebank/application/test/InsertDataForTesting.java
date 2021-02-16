@@ -9,9 +9,10 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.stereotype.Component;
 
 import br.com.bluebank.application.service.MovementService;
@@ -44,12 +45,6 @@ public class InsertDataForTesting
     @Autowired
     private TransferService transferService;
 
-    @Value("${spring.profiles.active}")
-    private String activeProfile;
-    
-    @Value("${spring.jpa.hibernate.ddl-auto}")
-    private String dllMode;
-
     private final String CLASS_NAME = this.getClass().getSimpleName();
 
     private static final Logger logger = LoggerFactory.getLogger(InsertDataForTesting.class);
@@ -57,14 +52,20 @@ public class InsertDataForTesting
     @EventListener
     public void onApplicationEvent(ContextRefreshedEvent event) throws BlueBankException 
     {
-        if(activeProfile.toLowerCase().equals("dev") && dllMode.toLowerCase().equals("create-drop"))
+        String dllMode = "spring.jpa.hibernate.ddl-auto";
+
+        Environment environment = event.getApplicationContext().getEnvironment();
+        Boolean isCreateMode = environment.getProperty(dllMode).toLowerCase().equals("create-drop");
+
+        if(environment.acceptsProfiles(Profiles.of("dev")) && isCreateMode)
         {
             logger.debug(CLASS_NAME.concat("...RUNNING"));
 
             User[] users = users();
             List<Account> allAccounts = new ArrayList<>();
 
-            for (int i = 0; i <= (users.length - 1); i++) {
+            for (int i = 0; i <= (users.length - 1); i++) 
+            {
                 // Fetch user accounts
                 allAccounts = accountRepository.findByUsername(users[i].getCpfCnpj());
 
@@ -100,8 +101,8 @@ public class InsertDataForTesting
     private void setTransfers() throws TransferException, InsufficienteBalanceException 
     {
         List<Account> accounts = accountRepository.findAll();
-        Account fromAccount = accounts.get(0); // 08111
-        Account toAccount = accounts.get(2); // 08113
+        Account fromAccount = accounts.get(0);
+        Account toAccount = accounts.get(2);
 
         TransferForm t = new TransferForm();
         t.setAccountType(fromAccount.getAccountType());

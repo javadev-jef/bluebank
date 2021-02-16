@@ -24,11 +24,6 @@ public class MovementService
     @Autowired
     private AccountRepository accountRepository;
 
-    public BigDecimal getUserBalance(String numAccount) 
-    {
-        return movementRepository.findBalanceByNumAccount(numAccount);
-    }
-
     public StatementResponse getStatementData(StatementFilter stf, String username) 
     {
         Account accountUser = accountRepository.findByUsernameAndAccountType(username, stf.getAccountType()).orElseThrow();

@@ -41,7 +41,8 @@ public class EntryAuthenticationFilter extends OncePerRequestFilter
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException 
     {
-        String path = request.getServletPath();
+        // ServletPath is null running tests
+        String path = request.getServletPath() != null ? request.getServletPath() : request.getPathInfo();
         
         return path.equals("/api/user/register") 
             || path.equals("/api/server/default-response/public")

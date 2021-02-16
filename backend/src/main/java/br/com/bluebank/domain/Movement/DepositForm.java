@@ -23,6 +23,8 @@ import lombok.Setter;
 @SuppressWarnings("serial")
 public class DepositForm implements Serializable
 {
+    private Integer id;
+    
     @Size(min = 5, message = "O número da conta deve possui no minimo 5 digitos")
     @NotBlank(message = "O número da conta não pode ser vázia")
     private String numAccount;

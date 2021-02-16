@@ -20,8 +20,6 @@ public interface AccountRepository extends JpaRepository<Account, String>
     @Query("SELECT a FROM Account AS a WHERE a.user.cpfCnpj = ?1")
     public List<Account> findByUsername(String username);
 
-    public Account findByUser_idAndNumAccount(Integer id, String numAccount);
-
     @Query("SELECT a FROM Account AS a WHERE a.user.cpfCnpj = ?1 AND a.accountType = ?2")
     public Optional<Account> findByUsernameAndAccountType(String id, AccountType accountType);
 

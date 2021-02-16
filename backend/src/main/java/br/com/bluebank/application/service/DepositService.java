@@ -88,7 +88,9 @@ public class DepositService
         mvd.setNumTransaction(lastNumTransaction);
         mvd.setSequence(lastSequence);
         mvd = MovementServiceUtils.prepareToSave(mvd);
-        movementRepository.save(mvd);
+
+        Movement mvdPersisted = movementRepository.save(mvd);
+        dForm.setId(mvdPersisted.getId());
         
         if(!mvd.getScheduled())
         {

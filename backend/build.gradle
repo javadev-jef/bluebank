@@ -6,7 +6,7 @@ plugins {
 
 group = 'br.com.bluebank'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '8'
+sourceCompatibility = '1.8'
 
 configurations {
 	compileOnly {
@@ -37,6 +37,7 @@ dependencies {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
 	testImplementation 'org.springframework.security:spring-security-test'
+    testRuntime 'com.h2database:h2'
 }
 
 test {

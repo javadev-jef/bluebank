@@ -82,9 +82,9 @@ public class AppServiceController
     public ResponseEntity<Map<String, BigDecimal>> getAccountBalance(@PathVariable("accountType") AccountType accountType) 
     {
         String username = JWTTokenUtils.loggedUsername();
-        String numAccount = accountRepository.obtainNumAccountByParams(username, accountType);
 
-        BigDecimal balance = movementService.getUserBalance(numAccount);
+        Account account = accountRepository.findByUsernameAndAccountType(username, accountType).orElseThrow();
+        BigDecimal balance = account.getBalance();
 
         Map<String, BigDecimal> map = new LinkedHashMap<>();
         map.put("balance", balance);

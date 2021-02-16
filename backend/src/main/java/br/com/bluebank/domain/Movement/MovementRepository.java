@@ -1,6 +1,5 @@
 package br.com.bluebank.domain.Movement;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -13,10 +12,7 @@ import br.com.bluebank.domain.Movement.Movement.MovementType;
 import br.com.bluebank.domain.User.User;
 @RepositoryRestResource(exported = false)
 public interface MovementRepository extends PagingAndSortingRepository<Movement, Integer>
-{
-    @Query("SELECT SUM(s.finalAmount) FROM Movement AS s WHERE s.account.numAccount = ?1 AND s.scheduled = false")
-    public BigDecimal findBalanceByNumAccount(String numAccount);   
-
+{ 
     @Query("SELECT m FROM Movement AS m WHERE m.scheduled = true AND CAST(m.date AS LocalDate) = ?1")
     public List<Movement> findAllScheduledByDate(LocalDate date);
 
