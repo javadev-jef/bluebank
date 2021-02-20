@@ -11,9 +11,11 @@ import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurer;
 public class BackendApplication implements RepositoryRestConfigurer
 {
     private static final Logger logger = LoggerFactory.getLogger(BackendApplication.class);
+
 	public static void main(String[] args) 
 	{
         SpringApplication.run(BackendApplication.class, args);
+        logger.debug("Current version java in the system.... v"+System.getProperty("java.version"));
     }
 
 	@Override
