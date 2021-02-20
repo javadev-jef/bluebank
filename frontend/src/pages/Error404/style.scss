@@ -1,0 +1,39 @@
+
+@import "../../variables";
+
+div.error-404-container
+{
+    width: 100%;
+    max-width: 1120px;
+    padding: 0 30px;
+    margin: 32px auto;
+    display: flex;
+    justify-content: center;
+    *background-color: yellow;
+    -webkit-animation: fade-in 1.2s cubic-bezier(0.390, 0.575, 0.565, 1.000) both;
+	        animation: fade-in 1.2s cubic-bezier(0.390, 0.575, 0.565, 1.000) both;
+
+    h1
+    {
+        text-align: center;
+        font-size: 120px;
+        color: $colorPrimaryDark;
+        -webkit-animation: bounce-top 0.9s both;
+        animation: bounce-top 0.9s both;
+    }
+
+    h3{color: $colorPrimary}
+
+    div
+    {
+        margin-top: 72px;
+        *background-color: pink;
+        display: flex;
+        flex-direction: column;
+
+        a:hover{
+            -webkit-animation: heartbeat 1.5s ease-in-out infinite both;
+	        animation: heartbeat 1.5s ease-in-out infinite both;
+        }
+    }
+}

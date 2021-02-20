@@ -65,10 +65,10 @@ export default function Transfer()
                     <h2>Transferência</h2>
                     <p>No Blue Bank você consegue fazer transferências com facilidade. Confira a baixo como é simples:</p>
                     <ol>
-                        <li>Preencha seus dados, informando a conta (Origem)</li>
-                        <li>Inclua os dados do favorecido (Destino)</li>
-                        <li>Selecione a data em que desejar realizar a transferência</li>
-                        <li>Confira os dados, e clique em transferir</li>
+                        <li>Preencha seus dados, informando a conta (Origem).</li>
+                        <li>Inclua os dados do favorecido (Destino).</li>
+                        <li>Selecione a data em que desejar realizar a transferência.</li>
+                        <li>Confira os dados, e clique em transferir.</li>
                     </ol>
                     <img src={transferImg} alt="Transfer Money"/>
                 </section>

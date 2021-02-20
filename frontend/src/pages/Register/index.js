@@ -1,7 +1,7 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useContext, useState } from "react";
 
 import "./style.scss";
-import { Link, useHistory } from "react-router-dom";
+import { Link, Redirect, useHistory } from "react-router-dom";
 import { FiArrowLeft } from "react-icons/fi";
 import Form from "./Form";
 import { API_ENDPOINT } from "../../constants/constants";
@@ -11,9 +11,11 @@ import Logo from "../../components/Logo";
 import { useDefaultResponseServer } from "../../hooks/useDefaultResponseServer";
 import { useHandleResponseError } from "../../hooks/useHandleResponseError";
 import {routes} from "../../constants/paths.json";
+import { AuthContext } from "../../hooks/useAuth";
 
 export default function Register()
 {
+    const auth = useContext(AuthContext);
     const [alertMessage, setAlertMessage] = useState({open: false});
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState([]);
@@ -50,6 +52,11 @@ export default function Register()
         {
             setLoading(false);
         }
+    }
+
+    if(auth.isAuthenticated() && !auth.isTokenExpired())
+    {
+        return <Redirect to={{pathname: routes.home}}/>
     }
 
     return(

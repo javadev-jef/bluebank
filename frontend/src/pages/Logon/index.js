@@ -15,9 +15,11 @@ export default function Logon()
     const [alert, setAlert] = useState({});
     const {clearCredentials, clearStates} = auth;
     const {serverComponents} = useDefaultResponseServer(setAlert);
+    const [currentPage, setCurrentPage] = useState();
 
     const onSuccessForm = (data) =>
     {
+        setCurrentPage(routes.logon);
         auth.requestLogin(data);
     }
 
@@ -25,7 +27,7 @@ export default function Logon()
     {
         return () => clearStates();
     }, 
-    [clearStates])
+    [clearStates]);
 
     useEffect(() => 
     {
@@ -35,11 +37,11 @@ export default function Logon()
 
     useEffect(() =>
     {
-        clearCredentials();
         const lastSessionExpired = sessionStorage.getItem("expiredSession");
 
         if(lastSessionExpired != null)
         {
+            clearCredentials();
             setAlert(JSON.parse(lastSessionExpired));
             sessionStorage.removeItem("expiredSession");
         }
@@ -48,7 +50,7 @@ export default function Logon()
 
     if(auth.isAuthenticated() && !auth.isTokenExpired())
     {
-        return <Redirect to={{pathname: routes.home, state: {backPage: routes.logon}}}/>
+        return <Redirect to={{pathname: routes.home, state: {backPage: currentPage}}}/>
     }
 
     return(

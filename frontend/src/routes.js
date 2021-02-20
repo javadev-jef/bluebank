@@ -10,6 +10,7 @@ import { MATERIAL_THEME } from "./constants/constants";
 import { routes } from "./constants/paths.json";
 import { AuthContext, useAuth } from "./hooks/useAuth";
 import Deposit from "./pages/Deposit";
+import Error404 from "./pages/Error404";
 import Home from "./pages/Home";
 import Logon from "./pages/Logon";
 import Profile from "./pages/Profile";
@@ -54,6 +55,7 @@ const Routes = () =>
                                 <Route path={routes.deposit} exact component={Deposit} />
                                 <PrivateRoute path={routes.withdraw} exact component={Withdraw} />
                                 <PrivateRoute path={routes.profile} exact component={Profile}/>
+                                <Route component={Error404}/>
                             </Switch>
                         </BrowserRouter>
                     </MediaQuery>

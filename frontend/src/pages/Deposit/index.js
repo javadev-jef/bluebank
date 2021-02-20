@@ -102,8 +102,8 @@ const Deposit = () =>
                     
                     {logged &&
                     <ol>
-                        <li>Tenha praticidade ao realizar o seu depósito</li>
-                        <li>Receba seu comprovante de depósito na mesma hora</li>
+                        <li>Tenha praticidade ao realizar o seu depósito.</li>
+                        <li>Receba seu comprovante de depósito na mesma hora.</li>
                     </ol>
                     }
 
