@@ -23,6 +23,7 @@ import br.com.bluebank.domain.User.UserLogon;
 import br.com.bluebank.infrastructure.web.RestResponseError;
 import br.com.bluebank.infrastructure.web.security.Utils.JWTConstantsUtils;
 import br.com.bluebank.infrastructure.web.security.Utils.JWTTokenUtils;
+import br.com.bluebank.utils.ObjectMapperUtils;
 
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter
 {
@@ -45,9 +46,8 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         try
         {
-            ObjectMapper mapper = new ObjectMapper();
-            UserLogon userLogon = mapper.readValue(request.getInputStream(), UserLogon.class);
-            String jsonStr = mapper.writeValueAsString(userLogon);
+            UserLogon userLogon = ObjectMapperUtils.jsonToObject(request.getInputStream(), UserLogon.class);
+            String jsonStr = ObjectMapperUtils.ObjectToJson(userLogon);
 
             UsernamePasswordAuthenticationToken upat = new UsernamePasswordAuthenticationToken(jsonStr, userLogon.getPassword());
 

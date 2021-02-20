@@ -9,8 +9,6 @@ import java.util.Map;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -36,6 +34,7 @@ import br.com.bluebank.domain.Movement.Movement.MovementType;
 import br.com.bluebank.domain.Movement.MovementRepository;
 import br.com.bluebank.utils.CashType;
 import br.com.bluebank.utils.MovementServiceUtils;
+import br.com.bluebank.utils.ObjectMapperUtils;
 
 @Service
 public class DepositService 
@@ -157,13 +156,9 @@ public class DepositService
 
         String dataDecoded = new String(Base64.getDecoder().decode(dataEncoded));
 
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
-        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-
         try
         {
-            return mapper.readValue(dataDecoded, Coin.class);
+            return ObjectMapperUtils.jsonToObject(dataDecoded, Coin.class);
         }
         catch(IOException ex)
         {

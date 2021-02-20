@@ -1,15 +1,11 @@
 package br.com.bluebank.application.service;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Optional;
 
 import javax.transaction.Transactional;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -23,10 +19,11 @@ import br.com.bluebank.domain.Coin.Coin;
 import br.com.bluebank.domain.Coin.CoinRepository;
 import br.com.bluebank.domain.Movement.Movement;
 import br.com.bluebank.domain.Movement.Movement.MovementType;
-import br.com.bluebank.utils.CashType;
-import br.com.bluebank.utils.MovementServiceUtils;
 import br.com.bluebank.domain.Movement.MovementRepository;
 import br.com.bluebank.domain.Movement.WithdrawForm;
+import br.com.bluebank.utils.CashType;
+import br.com.bluebank.utils.MovementServiceUtils;
+import br.com.bluebank.utils.ObjectMapperUtils;
 
 @Service
 public class WithdrawService 
@@ -75,11 +72,7 @@ public class WithdrawService
             Coin coin = new Coin(mvw);
             coinRepository.save(coin);
             
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.registerModule(new JavaTimeModule());
-            mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-            
-            String coinJson = mapper.writeValueAsString(coin);
+            String coinJson = ObjectMapperUtils.ObjectToJson(coin);
             String coinJsonEncoded = Base64.getEncoder().encodeToString(coinJson.getBytes());
             
             WebClient webClient = WebClient.create("https://api.qrserver.com/v1/create-qr-code");
@@ -98,7 +91,7 @@ public class WithdrawService
 
             return Optional.of(response);
         }
-        catch(JsonProcessingException ex)
+        catch(IOException ex)
         {
             throw new RuntimeException(ex);
         }

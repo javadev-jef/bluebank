@@ -1,7 +1,6 @@
 package br.com.bluebank.infrastructure.web.security;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,6 +13,7 @@ import br.com.bluebank.domain.Account.AccountRepository;
 import br.com.bluebank.domain.User.User;
 import br.com.bluebank.domain.User.UserLogon;
 import br.com.bluebank.domain.User.UserRepository;
+import br.com.bluebank.utils.ObjectMapperUtils;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService 
@@ -33,8 +33,7 @@ public class UserDetailsServiceImpl implements UserDetailsService
     {
         try 
         {
-            ObjectMapper mapper = new ObjectMapper();
-            UserLogon userLogon = mapper.readValue(jsonStr, UserLogon.class);
+            UserLogon userLogon = ObjectMapperUtils.jsonToObject(jsonStr, UserLogon.class);;
             
             User user = null;
             switch (userLogon.getLogonType()) 
@@ -64,7 +63,7 @@ public class UserDetailsServiceImpl implements UserDetailsService
 
             return new UserDetailsImpl(user);
         } 
-        catch (JsonProcessingException e) 
+        catch (IOException e) 
         {
 			throw new RuntimeException(e);
 		}
